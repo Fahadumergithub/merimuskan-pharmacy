@@ -462,6 +462,26 @@
                     updateCart();
                 });
             });
+
+            // Restore saved selections if returning from confirmation page
+            const savedSelections = JSON.parse(sessionStorage.getItem('savedSelections'));
+            if (savedSelections) {
+                savedSelections.products.forEach(savedProduct => {
+                    const productItem = document.querySelector(`.product-item[data-id="${savedProduct.id}"]`);
+                    if (productItem) {
+                        const checkbox = productItem.querySelector('.product-checkbox');
+                        const quantityInput = productItem.querySelector('.quantity-input');
+                        
+                        checkbox.checked = true;
+                        quantityInput.value = savedProduct.quantity;
+                        productItem.classList.add('selected-product');
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+                sessionStorage.removeItem('savedSelections');
+                updateTotal();
+                updateCart();
+            }
         }
 
         function updateTotal() {
@@ -541,6 +561,18 @@
 
         document.getElementById('orderForm').addEventListener('submit', function(event) {
             event.preventDefault();
+            
+            // Save current selections before proceeding to confirmation
+            const currentSelections = {
+                products: Array.from(document.querySelectorAll('.product-checkbox:checked')).map(checkbox => {
+                    const productItem = checkbox.closest('.product-item');
+                    return {
+                        id: productItem.dataset.id,
+                        quantity: productItem.querySelector('.quantity-input').value
+                    };
+                })
+            };
+            sessionStorage.setItem('savedSelections', JSON.stringify(currentSelections));
             
             const formData = {
                 name: document.getElementById('name').value,
