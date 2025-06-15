@@ -3,314 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merimuskan e-Prescription & Home Delivery</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="Access-Control-Allow-Methods" content="GET">
+    <title>Merimuskan Pharmacy</title>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f3fe;
-            margin: 0;
-            padding: 0;
-            color: #2C3345;
-        }
-        .form-container {
-            max-width: 752px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        .form-header {
-            color: #2C3345;
-            text-align: left;
-            margin-bottom: 30px;
-        }
-        .form-header h1 {
-            color: #2a4365;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        .product-item {
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            background: white;
-        }
-        .product-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-        .product-item img {
-            max-width: 100%;
-            height: 150px;
-            object-fit: contain;
-            margin-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #4a5568;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            border-color: #4299e1;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
-        }
-        .required {
-            color: #e53e3e;
-        }
-        .submit-button {
-            background: #4299e1;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: background 0.3s;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .submit-button:hover {
-            background: #3182ce;
-        }
-        .total-section {
-            text-align: right;
-            font-size: 20px;
-            margin: 30px 0;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-        .delivery-info {
-            background: #ebf8ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #4299e1;
-        }
-        .quantity-select {
-            margin-top: 10px;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #e2e8f0;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-            color: #4a5568;
-        }
-        .error-message {
-            color: #e53e3e;
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-        }
-        .error-message button {
-            background: #4299e1;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        .broken-image {
-            background: #f0f0f0;
-            padding: 20px;
-            color: #666;
-            font-size: 14px;
-        }
+        /* Your existing styles here */
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <div class="form-header">
-            <h1>Merimuskan e-Prescription & Home Delivery Request</h1>
-            <p>Please select the products you need by checking the boxes below.</p>
-        </div>
-
-        <div class="products-grid" id="productsContainer">
-            <div class="loading">Loading products...</div>
-        </div>
-
-        <form id="orderForm">
-            <h2 style="color: #2a4365; margin-bottom: 20px;">Customer Information</h2>
-            
-            <div class="form-group">
-                <label for="name">Name <span class="required">*</span></label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="phone">Phone Number <span class="required">*</span></label>
-                <input type="tel" id="phone" name="phone" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="address">Shipping Address <span class="required">*</span></label>
-                <textarea id="address" name="address" rows="4" required></textarea>
-            </div>
-            
-            <div class="total-section">
-                <h3>Total: <span id="totalAmount">0.00</span> PKR</h3>
-            </div>
-            
-            <div class="delivery-info">
-                <h3>Free Delivery for all orders above 1000 Rs.*</h3>
-                <p>(* Cash on delivery (COD) only - Gulshan-e-Iqbal, Gulistan-e-johar, DHA, Clifton, Nazimabad, North Nazimabad)</p>
-            </div>
-            
-            <button type="submit" class="submit-button">Review Your Order</button>
-        </form>
-    </div>
+    <!-- Your existing HTML here -->
 
     <script>
-        // Load products from GitHub
+        // 1. First try direct load
         async function loadProducts() {
             const container = document.getElementById('productsContainer');
-            container.innerHTML = '<div class="loading">Loading products...</div>';
             
             try {
-                // Add cache-busting to prevent loading old versions
-                const response = await fetch('https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/products.json?t=' + Date.now());
-                
-                if (!response.ok) throw new Error('Failed to load products');
+                // Attempt with cache busting
+                const response = await fetch('https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/products.json?t=' + Date.now(), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
                 
                 const products = await response.json();
+                renderProducts(products);
                 
-                // Fix image URLs if needed
-                const fixedProducts = products.map(product => {
-                    return {
-                        ...product,
-                        image: product.image
-                            .replace('github.com', 'raw.githubusercontent.com')
-                            .replace('/blob', '')
-                    };
-                });
-                
-                renderProducts(fixedProducts);
             } catch (error) {
-                console.error('Error:', error);
-                container.innerHTML = `
-                    <div class="error-message">
-                        Error loading products. Please:<br>
-                        1. Check internet connection<br>
-                        2. Verify JSON file exists in repo<br>
-                        <button onclick="location.reload()">Retry</button>
-                    </div>
-                `;
+                console.log("First attempt failed, trying fallback...");
+                tryFallback();
             }
         }
 
-        // Display products on the page
-        function renderProducts(products) {
+        // 2. Fallback if direct load fails
+        async function tryFallback() {
             const container = document.getElementById('productsContainer');
-            container.innerHTML = '';
             
-            products.forEach(product => {
-                const productHTML = `
-                    <div class="product-item" data-id="${product.id}">
-                        <img src="${product.image}" alt="${product.name}" 
-                             onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=Product+Image'">
-                        <h3>${product.name}</h3>
-                        <p>${product.description}</p>
-                        <p><strong>${product.price.toFixed(2)} PKR</strong></p>
-                        <label>
-                            <input type="checkbox" class="product-checkbox" data-price="${product.price}"> Select
-                        </label>
-                        <select class="quantity-select">
-                            ${Array.from({length: 10}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', productHTML);
-            });
-
-            // Set up event listeners for checkboxes and quantity selects
-            document.querySelectorAll('.product-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', updateTotal);
-            });
-            
-            document.querySelectorAll('.quantity-select').forEach(select => {
-                select.addEventListener('change', updateTotal);
-            });
+            try {
+                // Try through CORS proxy
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const targetUrl = encodeURIComponent('https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/products.json');
+                
+                const response = await fetch(proxyUrl + targetUrl);
+                const products = await response.json();
+                renderProducts(products);
+                
+            } catch (error) {
+                console.error("Fallback failed:", error);
+                showError();
+            }
         }
 
-        // Update the total price when products are selected
-        function updateTotal() {
-            let total = 0;
-            document.querySelectorAll('.product-item').forEach(item => {
-                const checkbox = item.querySelector('.product-checkbox');
-                const quantity = item.querySelector('.quantity-select').value;
-                if (checkbox.checked) {
-                    total += parseFloat(checkbox.dataset.price) * parseInt(quantity);
-                }
-            });
-            document.getElementById('totalAmount').textContent = total.toFixed(2);
+        // 3. Final fallback with hardcoded data
+        function showError() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <p>Loading products from server failed. Showing cached products...</p>
+                    <button onclick="loadCachedProducts()">Load Cached Products</button>
+                </div>
+            `;
         }
 
-        // Handle form submission
-        document.getElementById('orderForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        function loadCachedProducts() {
+            const cachedProducts = [ /* your products array */ ];
+            renderProducts(cachedProducts);
+        }
+
+        // Your existing renderProducts() and other functions
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // First try normal load
+            loadProducts();
             
-            const formData = {
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                address: document.getElementById('address').value,
-                total: document.getElementById('totalAmount').textContent,
-                products: []
-            };
-
-            // Get all selected products
-            document.querySelectorAll('.product-item').forEach(item => {
-                const checkbox = item.querySelector('.product-checkbox');
-                if (checkbox.checked) {
-                    formData.products.push({
-                        id: item.dataset.id,
-                        name: item.querySelector('h3').textContent,
-                        price: checkbox.dataset.price,
-                        quantity: item.querySelector('.quantity-select').value
-                    });
+            // If no response after 3 seconds, show message
+            setTimeout(() => {
+                if (document.querySelector('.loading')) {
+                    document.getElementById('productsContainer').innerHTML += `
+                        <div style="color:#666; text-align:center;">
+                            Taking longer than usual... Still trying to load.
+                        </div>
+                    `;
                 }
-            });
-
-            // Save to session storage and go to confirmation page
-            sessionStorage.setItem('orderData', JSON.stringify(formData));
-            window.location.href = 'confirmation.html';
+            }, 3000);
         });
-
-        // Start loading products when page loads
-        document.addEventListener('DOMContentLoaded', loadProducts);
     </script>
 </body>
 </html>
