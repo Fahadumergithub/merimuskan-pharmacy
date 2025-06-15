@@ -110,6 +110,19 @@
             background: #f7fafc;
             border-color: #cbd5e0;
         }
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -141,11 +154,21 @@
 
         <div class="action-buttons">
             <a href="index.html" class="back-button">Back to Edit</a>
-            <button id="confirmOrder" class="confirm-button">Confirm Order</button>
+            <button id="confirmOrder" class="confirm-button">
+                <span id="spinner" class="loading-spinner"></span>
+                Confirm Order
+            </button>
         </div>
     </div>
 
+    <!-- Add EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
+        // Initialize EmailJS with your credentials
+        (function() {
+            emailjs.init("iTzoppHcrXT5MN1Iq"); // Your User ID (API key)
+        })();
+
         document.addEventListener('DOMContentLoaded', function() {
             // Retrieve order data from sessionStorage
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
@@ -194,11 +217,80 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // Handle order confirmation
-            document.getElementById('confirmOrder').addEventListener('click', function() {
-                // Redirect to thank you page
-                window.location.href = 'thankyou.html';
+            // Handle order confirmation with EmailJS
+            document.getElementById('confirmOrder').addEventListener('click', async function() {
+                const button = this;
+                const spinner = document.getElementById('spinner');
+                
+                // Show loading spinner
+                button.disabled = true;
+                spinner.style.display = 'inline-block';
+                
+                try {
+                    // Generate order details for email
+                    const orderDetails = orderData.products.map(p => 
+                        `${p.quantity}x ${p.name} - ${p.price} PKR`
+                    ).join('\n');
+                    
+                    // Detect delivery area
+                    const deliveryArea = detectDeliveryArea(orderData.address);
+                    const orderId = Math.floor(100000 + Math.random() * 900000);
+                    
+                    // 1. Send customer confirmation email
+                    await emailjs.send("service_cor6xnd", "customer_order_confirmation", {
+                        name: orderData.name,
+                        order_id: orderId,
+                        total: orderData.total,
+                        order_details: orderDetails,
+                        phone: orderData.phone,
+                        delivery_area: deliveryArea,
+                        email: orderData.email
+                    });
+                    
+                    // 2. Send admin notification email
+                    await emailjs.send("service_cor6xnd", "admin_order_notification", {
+                        name: orderData.name,
+                        phone: orderData.phone,
+                        email: orderData.email,
+                        address: orderData.address,
+                        total: orderData.total,
+                        products: orderData.products.map(p => ({
+                            name: p.name,
+                            quantity: p.quantity,
+                            price: p.price
+                        })),
+                        delivery_area: deliveryArea,
+                        order_details: orderDetails,
+                        order_id: orderId
+                    });
+                    
+                    // Redirect to thank you page
+                    window.location.href = 'thankyou.html';
+                } catch (error) {
+                    console.error('Email sending failed:', error);
+                    alert('Order confirmed! You may not receive confirmation emails due to a technical issue.');
+                    window.location.href = 'thankyou.html';
+                } finally {
+                    button.disabled = false;
+                    spinner.style.display = 'none';
+                }
             });
+            
+            // Helper function to detect delivery area
+            function detectDeliveryArea(address) {
+                const areas = [
+                    'Gulshan-e-Iqbal', 
+                    'Gulistan-e-johar', 
+                    'DHA', 
+                    'Clifton', 
+                    'Nazimabad', 
+                    'North Nazimabad'
+                ];
+                const foundArea = areas.find(area => 
+                    address.toLowerCase().includes(area.toLowerCase())
+                );
+                return foundArea || 'Other Area';
+            }
         });
     </script>
 </body>
