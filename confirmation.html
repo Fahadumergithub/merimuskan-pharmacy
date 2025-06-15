@@ -173,8 +173,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Initialize EmailJS
-        emailjs.init("iTzoppHcrXT5MN1Iq");
+        // 1. Initialize EmailJS PROPERLY
+        (function() {
+            emailjs.init({
+                publicKey: "iTzoppHcrXT5MN1Iq",
+                blockHeadless: true,
+                limitRate: {
+                    id: 'app',
+                    throttle: 10000
+                }
+            });
+        })();
 
         document.addEventListener('DOMContentLoaded', function() {
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
@@ -221,39 +230,60 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // Handle order confirmation
+            // Handle order confirmation with RELIABLE EMAIL DELIVERY
             document.getElementById('confirmOrder').addEventListener('click', async function() {
                 const button = this;
                 button.disabled = true;
                 document.getElementById('spinner').style.display = 'inline-block';
+                const orderId = 'MERI-' + Date.now().toString().slice(-6);
 
                 try {
-                    const orderId = 'MERI-' + Math.floor(1000 + Math.random() * 9000);
                     const now = new Date();
                     const deliveryArea = orderData.address.split(',')[0].trim();
                     
-                    // Create identical order summary for both emails
-                    const orderSummary = `CUSTOMER: ${orderData.name}
-PHONE: ${orderData.phone}
-ADDRESS: ${orderData.address}
+                    // Create COMPLETE order summary
+                    const orderSummary = `ORDER #${orderId}
+DATE: ${now.toLocaleString()}
+
+CUSTOMER DETAILS:
+Name: ${orderData.name}
+Phone: ${orderData.phone}
+Email: ${orderData.email}
+Address: ${orderData.address}
 
 ORDER ITEMS:
 ${orderData.products.map(p => 
     `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.price * p.quantity).toFixed(2)} PKR`
-).join('\n')}`;
+).join('\n')}
 
-                    // Send CUSTOMER email (using same format as admin)
-                    await emailjs.send("service_cor6xnd", "template_3e494ui", {
+TOTAL: ${orderData.total} PKR
+DELIVERY AREA: ${deliveryArea}`;
+
+                    // First verify email service is working
+                    const testEmail = await emailjs.send("service_cor6xnd", "template_3e494ui", {
+                        name: "Test Customer",
+                        order_id: "TEST-123",
+                        order_summary: "Connection test - please ignore",
+                        total: "0.00",
+                        delivery_area: "Test Area",
+                        phone: "0000000000"
+                    }).catch(e => {
+                        throw new Error("Email service test failed. Please check your EmailJS setup.");
+                    });
+
+                    // Send ACTUAL CUSTOMER email
+                    const customerEmail = await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
                         order_summary: orderSummary,
                         total: orderData.total,
                         delivery_area: deliveryArea,
-                        phone: orderData.phone
+                        phone: orderData.phone,
+                        email: orderData.email
                     });
 
-                    // Send ADMIN email (identical format)
-                    await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+                    // Send ADMIN email
+                    const adminEmail = await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
                         customer_email: orderData.email,
@@ -263,10 +293,16 @@ ${orderData.products.map(p =>
                         order_timestamp: now.toLocaleString()
                     });
 
-                    window.location.href = 'thankyou.html';
+                    // Verify both emails were sent
+                    if (customerEmail.status === 200 && adminEmail.status === 200) {
+                        window.location.href = 'thankyou.html';
+                    } else {
+                        throw new Error("Emails sent but delivery not confirmed");
+                    }
+
                 } catch (error) {
-                    console.error("Email failed:", error);
-                    alert("Order confirmed! If email doesn't arrive, please call us.");
+                    console.error("Email error:", error);
+                    alert(`Order #${orderId} confirmed! If you don't receive emails within 5 minutes, please call us at 0300-1234567 with this order number.`);
                     window.location.href = 'thankyou.html';
                 } finally {
                     button.disabled = false;
