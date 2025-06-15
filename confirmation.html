@@ -7,211 +7,114 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5;  /* Vibrant purple-blue */
-            --secondary: #10B981; /* Fresh green */
-            --accent: #F59E0B;   /* Warm amber */
-            --text: #2C3345;
-            --light-bg: #F0F9FF;
+            --lime-green: #A3E635;
+            --deep-teal: #0D9488;
+            --dark-slate: #1E293B;
+            --light-bg: #F0FDF4;
+            --accent-orange: #F97316;
         }
         
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f3f3fe 0%, #e9f5ff 100%);
+            background: var(--light-bg);
             margin: 0;
             padding: 20px;
-            color: var(--text);
+            color: var(--dark-slate);
         }
 
         .confirmation-container {
             max-width: 800px;
-            margin: 20px auto;
+            margin: 30px auto;
             background: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(163, 230, 53, 0.3);
         }
 
-        .confirmation-header {
-            text-align: center;
-            margin-bottom: 30px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+        /* ... (keep all other CSS styles from previous version) ... */
 
-        .confirmation-header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .confirmation-header .icon {
-            font-size: 60px;
-            color: var(--secondary);
-            margin-bottom: 15px;
-            text-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
-        }
-
-        .order-summary {
-            background: var(--light-bg);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border-left: 5px solid var(--primary);
-        }
-
-        .section-title {
-            color: var(--primary);
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 8px;
-            border-bottom: 2px dashed rgba(79, 70, 229, 0.3);
-        }
-
-        .info-row {
-            display: flex;
-            margin-bottom: 12px;
-            align-items: center;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: var(--primary);
-            width: 150px;
-            opacity: 0.9;
-        }
-
-        .info-value {
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        .product-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s;
-        }
-
-        .product-item:hover {
-            background: rgba(239, 246, 255, 0.5);
-            transform: translateX(5px);
-        }
-
-        .product-item div:first-child {
-            flex: 2;
-        }
-
-        .product-item div:last-child {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .total-section {
-            text-align: right;
-            font-size: 22px;
-            margin: 30px 0;
-            padding: 20px;
-            background: linear-gradient(to right, #f0fdf4, #ecfdf5);
-            border-radius: 10px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .total-section h3 {
-            color: var(--secondary);
-            margin: 0;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .back-button {
+        /* New back-to-cart button style */
+        .back-to-cart {
             background: white;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            padding: 14px 24px;
-            border-radius: 8px;
+            color: var(--accent-orange);
+            border: 2px solid var(--accent-orange);
+            padding: 16px 30px;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: 16px;
             transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            margin-top: 20px;
         }
 
-        .back-button:hover {
-            background: rgba(79, 70, 229, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .confirm-button {
-            background: linear-gradient(to right, var(--primary), #7C3AED);
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-            transition: all 0.3s;
-        }
-
-        .confirm-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
-        }
-
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Animated checkmark for fun */
-        .icon {
-            position: relative;
-        }
-        .icon::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(16, 185, 129, 0.1);
-            z-index: -1;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; }
-            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+        .back-to-cart:hover {
+            background: rgba(249, 115, 22, 0.1);
+            transform: translateY(-3px);
         }
     </style>
 </head>
 <body>
-    <!-- YOUR EXISTING HTML BODY (NO CHANGES NEEDED) -->
     <div class="confirmation-container">
-        <!-- Keep all your existing HTML structure exactly as is -->
-        <!-- Only the CSS above has been enhanced -->
+        <!-- ... (keep all existing HTML structure) ... -->
+        
+        <div class="action-buttons">
+            <a href="index.html" class="back-button">Back to Edit</a>
+            <button id="confirmOrder" class="confirm-button">
+                <span id="spinner" class="loading-spinner"></span>
+                Confirm Order
+            </button>
+        </div>
+
+        <!-- NEW BACK TO CART BUTTON -->
+        <a href="#" id="backToCart" class="back-to-cart">
+            ← Back to Cart (Keep Selections)
+        </a>
     </div>
 
-    <!-- YOUR EXISTING JAVASCRIPT (NO CHANGES NEEDED) -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Keep all your existing JavaScript exactly as is
+        // Initialize EmailJS
+        emailjs.init("iTzoppHcrXT5MN1Iq");
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderData = JSON.parse(sessionStorage.getItem('orderData'));
+            
+            // NEW: Save selections before leaving the page
+            document.getElementById('backToCart').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Store current selections temporarily
+                const currentSelections = {
+                    products: orderData.products,
+                    timestamp: new Date().getTime()
+                };
+                sessionStorage.setItem('savedSelections', JSON.stringify(currentSelections));
+                
+                // Redirect to cart
+                window.location.href = 'index.html';
+            });
+
+            // ... (keep all other existing JavaScript code) ...
+
+            // MODIFIED: Load order data with saved selections check
+            if (!orderData) {
+                // Check for saved selections when returning from cart
+                const savedSelections = JSON.parse(sessionStorage.getItem('savedSelections'));
+                if (savedSelections) {
+                    // If returning from cart with saved selections, redirect to index to reload them
+                    window.location.href = 'index.html';
+                } else {
+                    // No order data and no saved selections = fresh visit
+                    window.location.href = 'index.html';
+                }
+                return;
+            }
+
+            // ... (rest of your existing display code) ...
+        });
     </script>
 </body>
 </html>
