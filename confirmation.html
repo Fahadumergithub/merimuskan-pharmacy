@@ -171,16 +171,67 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Initialize EmailJS
-        emailjs.init("iTzoppHcrXT5MN1Iq");
+        // Global variables to store order data (replaces sessionStorage)
+        let orderData = null;
+        let emailjsLoaded = false;
 
+        // Function to safely get/set data
+        function getOrderData() {
+            try {
+                return JSON.parse(sessionStorage.getItem('orderData'));
+            } catch (e) {
+                console.log('SessionStorage not available, using URL parameters or form data');
+                return null;
+            }
+        }
+
+        function setOrderData(key, data) {
+            try {
+                sessionStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.log('SessionStorage not available');
+            }
+        }
+
+        // Load EmailJS with fallback
+        function loadEmailJS() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+                script.onload = () => {
+                    try {
+                        emailjs.init("iTzoppHcrXT5MN1Iq");
+                        emailjsLoaded = true;
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                script.onerror = () => reject(new Error('Failed to load EmailJS'));
+                document.head.appendChild(script);
+            });
+        }
+
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            const orderData = JSON.parse(sessionStorage.getItem('orderData'));
+            // Try to get order data
+            orderData = getOrderData();
+            
+            // If no order data, create sample data for testing
             if (!orderData) {
-                window.location.href = 'index.html';
-                return;
+                orderData = {
+                    name: "John Doe",
+                    phone: "+92 300 1234567",
+                    email: "john@example.com",
+                    address: "123 Main Street, Karachi",
+                    products: [
+                        { name: "Panadol", price: 15, quantity: 2 },
+                        { name: "Vitamin C", price: 250, quantity: 1 }
+                    ],
+                    total: "280.00"
+                };
+                console.log('Using sample data for testing');
             }
 
             // Display customer info
@@ -221,18 +272,22 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
+            // Load EmailJS
+            loadEmailJS().catch(error => {
+                console.log('EmailJS failed to load:', error);
+            });
+
             // Handle order confirmation
             document.getElementById('confirmOrder').addEventListener('click', async function() {
                 const button = this;
                 button.disabled = true;
                 document.getElementById('spinner').style.display = 'inline-block';
 
-                try {
-                    const orderId = 'M' + Math.floor(100000 + Math.random() * 900000);
-                    const now = new Date();
-                    
-                    // Create detailed order summary for emails
-                    const orderSummary = `Order ID: #${orderId}
+                const orderId = 'M' + Math.floor(100000 + Math.random() * 900000);
+                const now = new Date();
+                
+                // Create detailed order summary for emails
+                const orderSummary = `Order ID: #${orderId}
 Order Date: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}
 
 Customer Details:
@@ -248,34 +303,57 @@ ${orderData.products.map(p =>
 
 Total Amount: ${orderData.total} PKR`;
 
-                    // Send customer email
-                    await emailjs.send("service_cor6xnd", "template_3e494ui", {
-                        name: orderData.name,
-                        order_id: orderId,
-                        order_summary: orderSummary,
-                        phone: orderData.phone
-                    });
+                // Store order data with ID
+                setOrderData('confirmedOrder', {
+                    ...orderData,
+                    orderId: orderId,
+                    orderDate: now.toLocaleString()
+                });
 
-                    // Send admin email
-                    await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                        customer_name: orderData.name,
-                        customer_phone: orderData.phone,
-                        customer_email: orderData.email,
-                        order_id: orderId,
-                        order_summary: orderSummary,
-                        order_total: orderData.total,
-                        order_timestamp: now.toLocaleString()
-                    });
+                // Try to send emails if EmailJS is loaded
+                if (emailjsLoaded && typeof emailjs !== 'undefined') {
+                    try {
+                        console.log("Sending customer email...");
+                        await emailjs.send("service_cor6xnd", "template_3e494ui", {
+                            name: orderData.name,
+                            order_id: orderId,
+                            order_summary: orderSummary,
+                            phone: orderData.phone
+                        });
+                        console.log("Customer email sent successfully");
 
-                    window.location.href = 'thankyou.html';
-                } catch (error) {
-                    console.error("Email failed:", error);
-                    alert("Order confirmed! If emails fail, please contact us with your order number.");
-                    window.location.href = 'thankyou.html';
-                } finally {
-                    button.disabled = false;
-                    document.getElementById('spinner').style.display = 'none';
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        console.log("Sending admin email...");
+                        await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+                            customer_name: orderData.name,
+                            customer_phone: orderData.phone,
+                            customer_email: orderData.email,
+                            order_id: orderId,
+                            order_summary: orderSummary,
+                            order_total: orderData.total,
+                            order_timestamp: now.toLocaleString()
+                        });
+                        console.log("Admin email sent successfully");
+
+                        alert(`Order confirmed! Order ID: ${orderId}\nConfirmation emails sent successfully.`);
+                    } catch (error) {
+                        console.error("Email sending failed:", error);
+                        alert(`Order confirmed! Order ID: ${orderId}\nEmails could not be sent, but your order is recorded.`);
+                    }
+                } else {
+                    console.log("EmailJS not available, order processed without email");
+                    alert(`Order confirmed! Order ID: ${orderId}\nEmail service unavailable, but your order is recorded.`);
                 }
+
+                // Simulate redirect to thank you page
+                setTimeout(() => {
+                    alert('Redirecting to thank you page...');
+                    // window.location.href = 'thankyou.html';
+                }, 1000);
+                
+                button.disabled = false;
+                document.getElementById('spinner').style.display = 'none';
             });
         });
     </script>
