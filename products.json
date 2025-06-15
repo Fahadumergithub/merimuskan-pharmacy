@@ -4,14 +4,56 @@
         "name": "Panadol Tablets 500Mg",
         "description": "1 Strip = 10 Tablets",
         "price": 33.50,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/panadol_500mg_tablets.webp"
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/panadol-500mg-tablets.webp"
     },
     {
         "id": 1001,
         "name": "Panadol Childrens",
         "description": "120ml",
         "price": 136.50,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/panadol_120ml_liquid.webp"
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/panadol-120ml-liquid.webp"
+    },
+    {
+        "id": 1003,
+        "name": "Brufen Ds 90Ml Suspension",
+        "description": "200Mg/5Ml",
+        "price": 109.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/brufen%20ds.webp"
+    },
+    {
+        "id": 1005,
+        "name": "Augmentin Tablet 1G",
+        "description": "1 Strip = 6 Tablets",
+        "price": 338.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-tablets-1gms-6s.webp"
+    },
+    {
+        "id": 1006,
+        "name": "Augmentin Bd 70Ml Suspension",
+        "description": "457Mg/5Ml",
+        "price": 385.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-bd-susp-457m-70ml.webp"
+    },
+    {
+        "id": 1011,
+        "name": "Prodent Tooth Paste",
+        "description": "100 grams",
+        "price": 296.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/prodent-toothpaste.webp"
+    },
+    {
+        "id": 1012,
+        "name": "Hi-Salz Tooth Paste",
+        "description": "100 grams",
+        "price": 247.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
+    },
+    {
+        "id": 1016,
+        "name": "Colgate Toothbrush",
+        "description": "Kidz",
+        "price": 120.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/kidz%20brush.webp"
     },
     {
         "id": 1002,
@@ -21,32 +63,11 @@
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen400.webp"
     },
     {
-        "id": 1003,
-        "name": "Brufen Ds 90Ml Suspension",
-        "description": "200Mg/5Ml",
-        "price": 109.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen_ds.webp"
-    },
-    {
         "id": 1004,
         "name": "Ansaid Tablets 100Mg",
         "description": "1 Strip = 10 Tablets",
         "price": 121.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/ansaid.webp"
-    },
-    {
-        "id": 1005,
-        "name": "Augmentin Tablet 1G",
-        "description": "1 Strip = 6 Tablets",
-        "price": 338.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/augmentin_tablets_1gms.webp"
-    },
-    {
-        "id": 1006,
-        "name": "Augmentin Bd 70Ml Suspension",
-        "description": "457Mg/5Ml",
-        "price": 385.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/augmentin_bd_susp.webp"
     },
     {
         "id": 1007,
@@ -77,20 +98,6 @@
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/rapid.webp"
     },
     {
-        "id": 1011,
-        "name": "Prodent Tooth Paste",
-        "description": "100 grams",
-        "price": 296.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/prodent_toothpaste.webp"
-    },
-    {
-        "id": 1012,
-        "name": "Hi-Salz Tooth Paste",
-        "description": "100 grams",
-        "price": 247.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/hi_salz_tp.webp"
-    },
-    {
         "id": 1013,
         "name": "Secure Junior Tooth Paste",
         "description": "60 grams",
@@ -110,12 +117,5 @@
         "description": "Soft",
         "price": 230.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/colgatesoft360.webp"
-    },
-    {
-        "id": 1016,
-        "name": "Colgate Toothbrush",
-        "description": "Kidz",
-        "price": 120.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/kidz_brush.webp"
     }
 ]
