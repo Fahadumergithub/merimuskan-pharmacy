@@ -171,67 +171,16 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Global variables to store order data (replaces sessionStorage)
-        let orderData = null;
-        let emailjsLoaded = false;
+        // Initialize EmailJS
+        emailjs.init("iTzoppHcrXT5MN1Iq");
 
-        // Function to safely get/set data
-        function getOrderData() {
-            try {
-                return JSON.parse(sessionStorage.getItem('orderData'));
-            } catch (e) {
-                console.log('SessionStorage not available, using URL parameters or form data');
-                return null;
-            }
-        }
-
-        function setOrderData(key, data) {
-            try {
-                sessionStorage.setItem(key, JSON.stringify(data));
-            } catch (e) {
-                console.log('SessionStorage not available');
-            }
-        }
-
-        // Load EmailJS with fallback
-        function loadEmailJS() {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-                script.onload = () => {
-                    try {
-                        emailjs.init("iTzoppHcrXT5MN1Iq");
-                        emailjsLoaded = true;
-                        resolve();
-                    } catch (e) {
-                        reject(e);
-                    }
-                };
-                script.onerror = () => reject(new Error('Failed to load EmailJS'));
-                document.head.appendChild(script);
-            });
-        }
-
-        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to get order data
-            orderData = getOrderData();
-            
-            // If no order data, create sample data for testing
+            const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
-                orderData = {
-                    name: "John Doe",
-                    phone: "+92 300 1234567",
-                    email: "john@example.com",
-                    address: "123 Main Street, Karachi",
-                    products: [
-                        { name: "Panadol", price: 15, quantity: 2 },
-                        { name: "Vitamin C", price: 250, quantity: 1 }
-                    ],
-                    total: "280.00"
-                };
-                console.log('Using sample data for testing');
+                window.location.href = 'index.html';
+                return;
             }
 
             // Display customer info
@@ -272,88 +221,59 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // Load EmailJS
-            loadEmailJS().catch(error => {
-                console.log('EmailJS failed to load:', error);
-            });
-
             // Handle order confirmation
             document.getElementById('confirmOrder').addEventListener('click', async function() {
                 const button = this;
                 button.disabled = true;
                 document.getElementById('spinner').style.display = 'inline-block';
 
-                const orderId = 'M' + Math.floor(100000 + Math.random() * 900000);
-                const now = new Date();
-                
-                // Create detailed order summary for emails
-                const orderSummary = `Order ID: #${orderId}
-Order Date: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}
+                try {
+                    const orderId = 'MERI-' + Math.floor(1000 + Math.random() * 9000);
+                    const now = new Date();
+                    
+                    // Format products for order summary
+                    const productsText = orderData.products.map(p => 
+                        `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
+                    ).join('\n');
 
-Customer Details:
-Name: ${orderData.name}
-Phone: ${orderData.phone}
-Email: ${orderData.email}
-Address: ${orderData.address}
+                    // Create complete order summary
+                    const orderSummary = `CUSTOMER: ${orderData.name}
+PHONE: ${orderData.phone}
+ADDRESS: ${orderData.address}
 
-Items Ordered:
-${orderData.products.map(p => 
-    `${p.quantity}x ${p.name} - ${p.price} PKR each = ${(p.price * p.quantity).toFixed(2)} PKR`
-).join('\n')}
+ORDER ITEMS:
+${productsText}
+`;
 
-Total Amount: ${orderData.total} PKR`;
+                    // Send customer email
+                    await emailjs.send("service_cor6xnd", "template_3e494ui", {
+                        name: orderData.name,
+                        order_id: orderId,
+                        total: orderData.total,
+                        phone: orderData.phone,
+                        email: orderData.email
+                    });
 
-                // Store order data with ID
-                setOrderData('confirmedOrder', {
-                    ...orderData,
-                    orderId: orderId,
-                    orderDate: now.toLocaleString()
-                });
+                    // Send admin email with PERFECTLY MATCHED variables
+                    await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+                        customer_name: orderData.name,
+                        customer_phone: orderData.phone,
+                        customer_email: orderData.email,
+                        order_id: orderId,
+                        order_summary: orderSummary,
+                        order_total: orderData.total,
+                        order_timestamp: now.toLocaleString()
+                    });
 
-                // Try to send emails if EmailJS is loaded
-                if (emailjsLoaded && typeof emailjs !== 'undefined') {
-                    try {
-                        console.log("Sending customer email...");
-                        await emailjs.send("service_cor6xnd", "template_3e494ui", {
-                            name: orderData.name,
-                            order_id: orderId,
-                            order_summary: orderSummary,
-                            phone: orderData.phone
-                        });
-                        console.log("Customer email sent successfully");
-
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-
-                        console.log("Sending admin email...");
-                        await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                            customer_name: orderData.name,
-                            customer_phone: orderData.phone,
-                            customer_email: orderData.email,
-                            order_id: orderId,
-                            order_summary: orderSummary,
-                            order_total: orderData.total,
-                            order_timestamp: now.toLocaleString()
-                        });
-                        console.log("Admin email sent successfully");
-
-                        alert(`Order confirmed! Order ID: ${orderId}\nConfirmation emails sent successfully.`);
-                    } catch (error) {
-                        console.error("Email sending failed:", error);
-                        alert(`Order confirmed! Order ID: ${orderId}\nEmails could not be sent, but your order is recorded.`);
-                    }
-                } else {
-                    console.log("EmailJS not available, order processed without email");
-                    alert(`Order confirmed! Order ID: ${orderId}\nEmail service unavailable, but your order is recorded.`);
+                    window.location.href = 'thankyou.html';
+                } catch (error) {
+                    console.error("Email failed:", error);
+                    alert("Order confirmed! If email doesn't arrive, please call us.");
+                    window.location.href = 'thankyou.html';
+                } finally {
+                    button.disabled = false;
+                    document.getElementById('spinner').style.display = 'none';
                 }
-
-                // Simulate redirect to thank you page
-                setTimeout(() => {
-                    alert('Redirecting to thank you page...');
-                    // window.location.href = 'thankyou.html';
-                }, 1000);
-                
-                button.disabled = false;
-                document.getElementById('spinner').style.display = 'none';
             });
         });
     </script>
