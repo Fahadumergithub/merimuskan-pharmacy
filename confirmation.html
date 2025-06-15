@@ -230,37 +230,49 @@
                 try {
                     const orderId = 'MERI-' + Math.floor(1000 + Math.random() * 9000);
                     const now = new Date();
+                    const deliveryArea = orderData.address.split(',')[0].trim();
                     
-                    // Format products for order summary
+                    // Format products for emails
                     const productsText = orderData.products.map(p => 
                         `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
                     ).join('\n');
 
-                    // Create complete order summary
-                    const orderSummary = `CUSTOMER: ${orderData.name}
+                    // CUSTOMER EMAIL CONTENT
+                    const customerOrderDetails = `ORDER #${orderId}
+DATE: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}
+
+YOUR ORDER:
+${productsText}
+
+DELIVERY ADDRESS:
+${orderData.address}`;
+
+                    // ADMIN EMAIL CONTENT
+                    const adminOrderSummary = `CUSTOMER: ${orderData.name}
 PHONE: ${orderData.phone}
+EMAIL: ${orderData.email}
 ADDRESS: ${orderData.address}
 
 ORDER ITEMS:
-${productsText}
-`;
+${productsText}`;
 
-                    // Send customer email
+                    // Send CUSTOMER email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
                         total: orderData.total,
                         phone: orderData.phone,
-                        email: orderData.email
+                        order_details: customerOrderDetails,
+                        delivery_area: deliveryArea
                     });
 
-                    // Send admin email with PERFECTLY MATCHED variables
+                    // Send ADMIN email
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
                         customer_email: orderData.email,
                         order_id: orderId,
-                        order_summary: orderSummary,
+                        order_summary: adminOrderSummary,
                         order_total: orderData.total,
                         order_timestamp: now.toLocaleString()
                     });
