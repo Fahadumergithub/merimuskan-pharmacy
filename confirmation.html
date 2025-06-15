@@ -230,13 +230,10 @@
 
                 try {
                     const orderId = Math.floor(100000 + Math.random() * 900000);
-                    
-                    // Format products for email
-                    const productsList = orderData.products.map(p => 
-                        `${p.quantity} × ${p.name} - ${(p.price * p.quantity).toFixed(2)} PKR`
-                    ).join('<br>');
+                    const now = new Date();
+                    const timestamp = now.toLocaleString();
 
-                    // Send customer email
+                    // Prepare data for customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
@@ -245,16 +242,19 @@
                         email: orderData.email
                     });
 
-                    // Send admin email with complete order details
+                    // Prepare data for admin email - EXACTLY matching template variables
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                        customer_name: orderData.name,
-                        customer_phone: orderData.phone,
-                        customer_email: orderData.email,
-                        customer_address: orderData.address,
+                        name: orderData.name,
+                        phone: orderData.phone,
+                        email: orderData.email,
                         order_id: orderId,
-                        order_total: orderData.total,
-                        order_items: productsList,
-                        order_date: new Date().toLocaleString()
+                        products: orderData.products.map(p => ({
+                            name: p.name,
+                            quantity: p.quantity,
+                            price: p.price
+                        })),
+                        total: orderData.total,
+                        timestamp: timestamp
                     });
 
                     window.location.href = 'thankyou.html';
