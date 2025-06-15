@@ -1,0 +1,121 @@
+[
+    {
+        "id": 1000,
+        "name": "Panadol Tablets 500Mg",
+        "description": "1 Strip = 10 Tablets",
+        "price": 33.50,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/panadol_500mg_tablets_514e1a1770dc9e1a9a7fa937ce76bb26.webp"
+    },
+    {
+        "id": 1001,
+        "name": "Panadol Childrens",
+        "description": "120ml",
+        "price": 136.50,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/panadol_120ml_liquid_24172db681c61cee379ab15467e513ca.webp"
+    },
+    {
+        "id": 1002,
+        "name": "Brufen Tablets 400Mg",
+        "description": "1 Strip = 10 Tablets",
+        "price": 66.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen400_7cd96ae19a28b61e378e5151dcb01f65.webp"
+    },
+    {
+        "id": 1003,
+        "name": "Brufen Ds 90Ml Suspension",
+        "description": "200Mg/5Ml",
+        "price": 109.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen_ds_b76e015c54bf1acb1fe2bbd4d0446aff.webp"
+    },
+    {
+        "id": 1004,
+        "name": "Ansaid Tablets 100Mg",
+        "description": "1 Strip = 10 Tablets",
+        "price": 121.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/ansaid_348521a7d6cdda681453f9476fccde08.webp"
+    },
+    {
+        "id": 1005,
+        "name": "Augmentin Tablet 1G",
+        "description": "1 Strip = 6 Tablets",
+        "price": 338.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/augmentin_tablets_1gms_6s_70f21a388d490b1c57f7157a8b0772b1.webp"
+    },
+    {
+        "id": 1006,
+        "name": "Augmentin Bd 70Ml Suspension",
+        "description": "457Mg/5Ml",
+        "price": 385.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/augmentin_bd_susp_457m_70ml_f3b9b9450bce846e3c2bc2bee3795405.webp"
+    },
+    {
+        "id": 1007,
+        "name": "Flagyl Tablets 400Mg",
+        "description": "1 Strip = 10 Tablets",
+        "price": 44.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagyl400_d5519fc2faae38df0e6309158a6ed19f.webp"
+    },
+    {
+        "id": 1008,
+        "name": "Flagyl 120Ml Suspension",
+        "description": "200Mg/5Ml",
+        "price": 143.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagylsyp_83f43b5ae27f749def5f7ccae4d71c50.webp"
+    },
+    {
+        "id": 1009,
+        "name": "Sensodyne Fluoride Toothpaste",
+        "description": "100g",
+        "price": 350.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/sensodynef_07daa95269ea33bbf11b9d654d20a0f6.webp"
+    },
+    {
+        "id": 1010,
+        "name": "Sensodyne Rapid Action",
+        "description": "100 grams",
+        "price": 440.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/rapid_0d5d96e6497671146ea3bee2baf9b7d7.webp"
+    },
+    {
+        "id": 1011,
+        "name": "Prodent Tooth Paste",
+        "description": "100 grams",
+        "price": 296.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/prodent_toothpaste_134797914bfe30f9974b565fcb022954.webp"
+    },
+    {
+        "id": 1012,
+        "name": "Hi-Salz Tooth Paste",
+        "description": "100 grams",
+        "price": 247.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/hi_salz_tp_100gm_1s_7fd246676c9a93166e0fcc1212496aad.webp"
+    },
+    {
+        "id": 1013,
+        "name": "Secure Junior Tooth Paste",
+        "description": "60 grams",
+        "price": 157.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/secure_dd7e41ba78c2c6e15d6b814910db6d1b.webp"
+    },
+    {
+        "id": 1014,
+        "name": "Enziclor Mouth Wash",
+        "description": "240 ML",
+        "price": 351.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/enzicolor_1f084251f2cd3fdc8a76b0bdaebce1f1.webp"
+    },
+    {
+        "id": 1015,
+        "name": "Colgate 360 Base Toothbrush",
+        "description": "Soft",
+        "price": 230.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/colgatesoft360_e88100a8c411204dfabec349abef63ca.webp"
+    },
+    {
+        "id": 1016,
+        "name": "Colgate Toothbrush",
+        "description": "Kidz",
+        "price": 120.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/kidz_brush_4b283027927f50e4d4a19ef354d7cac1.webp"
+    }
+]
