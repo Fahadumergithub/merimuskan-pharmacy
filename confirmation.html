@@ -173,10 +173,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // 1. Initialize EmailJS
+        // Initialize EmailJS
         emailjs.init("iTzoppHcrXT5MN1Iq");
 
-        // 2. Load order data when page opens
         document.addEventListener('DOMContentLoaded', function() {
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
@@ -222,35 +221,37 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // 3. Handle order confirmation
+            // Handle order confirmation
             document.getElementById('confirmOrder').addEventListener('click', async function() {
                 const button = this;
                 button.disabled = true;
                 document.getElementById('spinner').style.display = 'inline-block';
 
                 try {
-                    const orderId = Math.floor(100000 + Math.random() * 900000);
+                    const orderId = 'M' + Math.floor(100000 + Math.random() * 900000);
                     const now = new Date();
                     
-                    // Format products as simple text (guaranteed to work)
-                    const productsText = orderData.products.map(p => 
-                        `${p.quantity}x ${p.name} @ ${p.price} PKR (${p.quantity * p.price} PKR)`
+                    // Format products for email
+                    const productsList = orderData.products.map(p => 
+                        `${p.quantity}x ${p.name} - ${p.price} PKR (${(p.price * p.quantity).toFixed(2)} PKR)`
                     ).join('\n');
 
-                    // Create complete order text for admin
-                    const completeOrderText = `
-                        ORDER #${orderId}
-                        Customer: ${orderData.name}
-                        Phone: ${orderData.phone}
-                        Email: ${orderData.email}
-                        Address: ${orderData.address}
-                        Date: ${now.toLocaleString()}
-                        
-                        PRODUCTS:
-                        ${productsText}
-                        
-                        TOTAL: ${orderData.total} PKR
-                    `;
+                    // Prepare complete order details
+                    const orderDetails = `
+ORDER #${orderId}
+DATE: ${now.toLocaleString()}
+
+CUSTOMER DETAILS:
+Name: ${orderData.name}
+Phone: ${orderData.phone}
+Email: ${orderData.email}
+Address: ${orderData.address}
+
+ORDER ITEMS:
+${productsList}
+
+TOTAL: ${orderData.total} PKR
+`;
 
                     // Send customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
@@ -261,16 +262,22 @@
                         email: orderData.email
                     });
 
-                    // Send admin email with ALL details in simple text format
+                    // Send admin email (using simple text format)
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                        subject: `New Order #${orderId} - ${orderData.total} PKR`,
-                        message: completeOrderText
+                        customer_name: orderData.name,
+                        customer_phone: orderData.phone,
+                        customer_email: orderData.email,
+                        order_id: orderId,
+                        order_details: orderDetails,
+                        order_total: orderData.total,
+                        order_date: now.toLocaleDateString(),
+                        order_time: now.toLocaleTimeString()
                     });
 
                     window.location.href = 'thankyou.html';
                 } catch (error) {
                     console.error("Email failed:", error);
-                    alert("Order confirmed! Your reference number is: " + orderId);
+                    alert("Order confirmed! If emails fail, please contact us with your order number.");
                     window.location.href = 'thankyou.html';
                 } finally {
                     button.disabled = false;
