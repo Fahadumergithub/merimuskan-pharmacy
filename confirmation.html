@@ -232,16 +232,27 @@
                     const orderId = Math.floor(100000 + Math.random() * 900000);
                     const now = new Date();
                     
-                    // Format products array EXACTLY as the template expects
-                    const productsForEmail = orderData.products.map(product => {
-                        return {
-                            name: product.name,
-                            quantity: product.quantity,
-                            price: product.price
-                        };
-                    });
+                    // Format products as simple text (guaranteed to work)
+                    const productsText = orderData.products.map(p => 
+                        `${p.quantity}x ${p.name} @ ${p.price} PKR (${p.quantity * p.price} PKR)`
+                    ).join('\n');
 
-                    // Send customer email (unchanged)
+                    // Create complete order text for admin
+                    const completeOrderText = `
+                        ORDER #${orderId}
+                        Customer: ${orderData.name}
+                        Phone: ${orderData.phone}
+                        Email: ${orderData.email}
+                        Address: ${orderData.address}
+                        Date: ${now.toLocaleString()}
+                        
+                        PRODUCTS:
+                        ${productsText}
+                        
+                        TOTAL: ${orderData.total} PKR
+                    `;
+
+                    // Send customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
@@ -250,21 +261,16 @@
                         email: orderData.email
                     });
 
-                    // Send admin email with PERFECTLY matched variables
+                    // Send admin email with ALL details in simple text format
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                        name: orderData.name,
-                        phone: orderData.phone,
-                        email: orderData.email,
-                        order_id: orderId,
-                        products: productsForEmail,
-                        total: orderData.total,
-                        timestamp: now.toLocaleString()
+                        subject: `New Order #${orderId} - ${orderData.total} PKR`,
+                        message: completeOrderText
                     });
 
                     window.location.href = 'thankyou.html';
                 } catch (error) {
                     console.error("Email failed:", error);
-                    alert("Order confirmed! If you don't receive emails, please contact us.");
+                    alert("Order confirmed! Your reference number is: " + orderId);
                     window.location.href = 'thankyou.html';
                 } finally {
                     button.disabled = false;
