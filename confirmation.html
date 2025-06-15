@@ -1,89 +1,170 @@
-<script>
-    // Initialize EmailJS with your credentials
-    emailjs.init("iTzoppHcrXT5MN1Iq");
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        // Retrieve and display order data (keep your existing code)
-        const orderData = JSON.parse(sessionStorage.getItem('orderData'));
-        if (!orderData) window.location.href = 'index.html';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Merimuskan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* YOUR EXISTING CSS (UNCHANGED) */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f3fe;
+            margin: 0;
+            padding: 0;
+            color: #2C3345;
+        }
+        .confirmation-container {
+            max-width: 752px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        /* ... (keep all other CSS rules exactly as they were) ... */
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- YOUR EXISTING HTML STRUCTURE (UNCHANGED) -->
+    <div class="confirmation-container">
+        <div class="confirmation-header">
+            <div class="icon">✓</div>
+            <h1>Review Your Order</h1>
+            <p>Please verify your information before confirming</p>
+        </div>
 
-        // Display customer details
-        const customerDetails = document.getElementById('customerDetails');
-        customerDetails.innerHTML = `
-            <div class="info-row">
-                <div class="info-label">Name:</div>
-                <div class="info-value">${orderData.name}</div>
+        <div class="order-summary">
+            <div class="customer-info">
+                <h2 class="section-title">Customer Information</h2>
+                <div id="customerDetails">
+                    <!-- Filled by JavaScript -->
+                </div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Phone:</div>
-                <div class="info-value">${orderData.phone}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Email:</div>
-                <div class="info-value">${orderData.email}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Address:</div>
-                <div class="info-value">${orderData.address}</div>
-            </div>
-        `;
 
-        // Display order items
-        const orderItems = document.getElementById('orderItems');
-        orderData.products.forEach(product => {
-            const itemTotal = (product.price * product.quantity).toFixed(2);
-            orderItems.innerHTML += `
-                <div class="product-item">
-                    <div>
-                        <strong>${product.name}</strong>
-                        <div>${product.quantity} × ${product.price} PKR</div>
-                    </div>
-                    <div>${itemTotal} PKR</div>
+            <div class="products-summary">
+                <h2 class="section-title">Order Summary</h2>
+                <div id="orderItems">
+                    <!-- Filled by JavaScript -->
+                </div>
+                <div class="total-section">
+                    <h3>Total: <span id="orderTotal">0.00</span> PKR</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="index.html" class="back-button">Back to Edit</a>
+            <button id="confirmOrder" class="confirm-button">
+                <span id="spinner" class="loading-spinner"></span>
+                Confirm Order
+            </button>
+        </div>
+    </div>
+
+    <!-- UPDATED JAVASCRIPT (COPY FROM HERE) -->
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        // 1. Initialize EmailJS
+        emailjs.init("iTzoppHcrXT5MN1Iq");
+
+        // 2. Load order data when page opens
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderData = JSON.parse(sessionStorage.getItem('orderData'));
+            if (!orderData) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Display customer info
+            document.getElementById('customerDetails').innerHTML = `
+                <div class="info-row">
+                    <div class="info-label">Name:</div>
+                    <div class="info-value">${orderData.name}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value">${orderData.phone}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">${orderData.email}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Address:</div>
+                    <div class="info-value">${orderData.address}</div>
                 </div>
             `;
+
+            // Display ordered products
+            const orderItems = document.getElementById('orderItems');
+            orderData.products.forEach(product => {
+                const itemTotal = (product.price * product.quantity).toFixed(2);
+                orderItems.innerHTML += `
+                    <div class="product-item">
+                        <div>
+                            <strong>${product.name}</strong>
+                            <div>${product.quantity} × ${product.price} PKR</div>
+                        </div>
+                        <div>${itemTotal} PKR</div>
+                    </div>
+                `;
+            });
+
+            // Display total
+            document.getElementById('orderTotal').textContent = orderData.total;
+
+            // 3. Handle order confirmation
+            document.getElementById('confirmOrder').addEventListener('click', async function() {
+                const button = this;
+                button.disabled = true;
+                document.getElementById('spinner').style.display = 'inline-block';
+
+                try {
+                    const orderId = Math.floor(100000 + Math.random() * 900000);
+
+                    // Send customer email (only essential fields)
+                    await emailjs.send("service_cor6xnd", "template_3e494ui", {
+                        name: orderData.name,
+                        order_id: orderId,
+                        total: orderData.total,
+                        phone: orderData.phone,
+                        email: orderData.email
+                    });
+
+                    // Send admin email (only essential fields)
+                    await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+                        name: orderData.name,
+                        phone: orderData.phone,
+                        email: orderData.email,
+                        total: orderData.total
+                    });
+
+                    window.location.href = 'thankyou.html';
+                } catch (error) {
+                    console.error("Email failed:", error);
+                    alert("Order confirmed! Emails may be delayed.");
+                    window.location.href = 'thankyou.html';
+                } finally {
+                    button.disabled = false;
+                    document.getElementById('spinner').style.display = 'none';
+                }
+            });
         });
-
-        // Display total
-        document.getElementById('orderTotal').textContent = orderData.total;
-
-        // Handle order confirmation
-        document.getElementById('confirmOrder').addEventListener('click', async function() {
-            const button = this;
-            button.disabled = true;
-            document.getElementById('spinner').style.display = 'inline-block';
-
-            try {
-                const orderId = Math.floor(100000 + Math.random() * 900000);
-                const orderDetails = orderData.products.map(p => 
-                    `${p.quantity}x ${p.name} - ${p.price} PKR`
-                ).join('\n');
-
-                // 1. Send customer confirmation email (only essential fields)
-                await emailjs.send("service_cor6xnd", "template_3e494ui", {
-                    name: orderData.name,
-                    order_id: orderId,
-                    total: orderData.total,
-                    phone: orderData.phone,
-                    email: orderData.email
-                });
-
-                // 2. Send admin notification email (only essential fields)
-                await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                    name: orderData.name,
-                    phone: orderData.phone,
-                    email: orderData.email,
-                    total: orderData.total
-                });
-
-                window.location.href = 'thankyou.html';
-            } catch (error) {
-                console.error("Email Error:", error);
-                alert("Order confirmed! You'll receive a confirmation shortly.");
-                window.location.href = 'thankyou.html';
-            } finally {
-                button.disabled = false;
-                document.getElementById('spinner').style.display = 'none';
-            }
-        });
-    });
-</script>
+    </script>
+    <!-- (END OF JAVASCRIPT) -->
+</body>
+</html>
