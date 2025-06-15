@@ -173,11 +173,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Initialize EmailJS with your User ID
+        // Initialize EmailJS
         emailjs.init("iTzoppHcrXT5MN1Iq");
 
+        // Google Sheets Configuration
+        const SPREADSHEET_ID = "1jcxTuSJJ79J31DmkqytbJUetVucvsHRff6NMhQAOOqI";
+        const API_KEY = "AIzaSyCAzxqB3Q_4rLcJnrHdnwlHrFWSv2uvl2k";
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Get order data from session storage
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
                 window.location.href = 'index.html';
@@ -222,6 +225,44 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
+            // Function to save to Google Sheets
+            async function saveToGoogleSheets(orderData, orderId) {
+                const now = new Date();
+                const requestBody = {
+                    values: [
+                        [
+                            orderId,
+                            now.toLocaleDateString(),
+                            now.toLocaleTimeString(),
+                            orderData.name,
+                            orderData.phone,
+                            orderData.email,
+                            orderData.address,
+                            orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
+                            orderData.total,
+                            "Pending"
+                        ]
+                    ]
+                };
+
+                try {
+                    const response = await fetch(
+                        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Orders!A:J:append?valueInputOption=USER_ENTERED&key=${API_KEY}`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        }
+                    );
+
+                    if (!response.ok) {
+                        console.log("Google Sheets save failed (but order still processed)");
+                    }
+                } catch (error) {
+                    console.error("Error saving to Google Sheets:", error);
+                }
+            }
+
             // Handle order confirmation
             document.getElementById('confirmOrder').addEventListener('click', async function() {
                 const button = this;
@@ -237,7 +278,7 @@
                         `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
                     ).join('\n');
 
-                    // Create complete order summary for both emails
+                    // Create complete order summary
                     const orderSummary = `Order ID: ${orderId}
 Date: ${now.toLocaleDateString()}
 
@@ -252,7 +293,7 @@ ${productsText}
 
 TOTAL: ${orderData.total} PKR`;
 
-                    // Send customer email with all details
+                    // Send customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
@@ -262,7 +303,7 @@ TOTAL: ${orderData.total} PKR`;
                         email: orderData.email
                     });
 
-                    // Send admin email with all details
+                    // Send admin email
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
@@ -273,9 +314,12 @@ TOTAL: ${orderData.total} PKR`;
                         order_timestamp: now.toLocaleString()
                     });
 
+                    // Save to Google Sheets
+                    await saveToGoogleSheets(orderData, orderId);
+
                     window.location.href = 'thankyou.html';
                 } catch (error) {
-                    console.error("Email failed:", error);
+                    console.error("Error:", error);
                     alert("Order confirmed! If email doesn't arrive, please call us.");
                     window.location.href = 'thankyou.html';
                 } finally {
