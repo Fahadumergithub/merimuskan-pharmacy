@@ -228,29 +228,21 @@
                 document.getElementById('spinner').style.display = 'inline-block';
 
                 try {
-                    const orderId = 'M' + Math.floor(100000 + Math.random() * 900000);
+                    const orderId = 'MERI-' + Math.floor(1000 + Math.random() * 9000);
                     const now = new Date();
                     
-                    // Format products for email
-                    const productsList = orderData.products.map(p => 
-                        `${p.quantity}x ${p.name} - ${p.price} PKR (${(p.price * p.quantity).toFixed(2)} PKR)`
+                    // Format products for order summary
+                    const productsText = orderData.products.map(p => 
+                        `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
                     ).join('\n');
 
-                    // Prepare complete order details
-                    const orderDetails = `
-ORDER #${orderId}
-DATE: ${now.toLocaleString()}
-
-CUSTOMER DETAILS:
-Name: ${orderData.name}
-Phone: ${orderData.phone}
-Email: ${orderData.email}
-Address: ${orderData.address}
+                    // Create complete order summary
+                    const orderSummary = `CUSTOMER: ${orderData.name}
+PHONE: ${orderData.phone}
+ADDRESS: ${orderData.address}
 
 ORDER ITEMS:
-${productsList}
-
-TOTAL: ${orderData.total} PKR
+${productsText}
 `;
 
                     // Send customer email
@@ -262,22 +254,21 @@ TOTAL: ${orderData.total} PKR
                         email: orderData.email
                     });
 
-                    // Send admin email (using simple text format)
+                    // Send admin email with PERFECTLY MATCHED variables
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
                         customer_email: orderData.email,
                         order_id: orderId,
-                        order_details: orderDetails,
+                        order_summary: orderSummary,
                         order_total: orderData.total,
-                        order_date: now.toLocaleDateString(),
-                        order_time: now.toLocaleTimeString()
+                        order_timestamp: now.toLocaleString()
                     });
 
                     window.location.href = 'thankyou.html';
                 } catch (error) {
                     console.error("Email failed:", error);
-                    alert("Order confirmed! If emails fail, please contact us with your order number.");
+                    alert("Order confirmed! If email doesn't arrive, please call us.");
                     window.location.href = 'thankyou.html';
                 } finally {
                     button.disabled = false;
