@@ -6,7 +6,6 @@
     <title>Order Confirmation - Merimuskan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* YOUR EXISTING CSS (UNCHANGED) */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f3fe;
@@ -22,7 +21,105 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-        /* ... (keep all other CSS rules exactly as they were) ... */
+        .confirmation-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .confirmation-header .icon {
+            width: 64px;
+            height: 64px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .confirmation-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .confirmation-header p {
+            margin: 8px 0 0;
+            color: #666;
+        }
+        .order-summary {
+            margin-bottom: 32px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .customer-info {
+            margin-bottom: 24px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+        .info-label {
+            font-weight: 500;
+            width: 120px;
+            color: #666;
+        }
+        .info-value {
+            flex: 1;
+        }
+        .products-summary {
+            margin-top: 24px;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .total-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #ddd;
+        }
+        .total-section h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+        }
+        .back-button, .confirm-button {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .back-button {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+        }
+        .confirm-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+        }
+        .confirm-button:hover {
+            background: #3e8e41;
+        }
         .loading-spinner {
             display: none;
             width: 20px;
@@ -39,7 +136,6 @@
     </style>
 </head>
 <body>
-    <!-- YOUR EXISTING HTML STRUCTURE (UNCHANGED) -->
     <div class="confirmation-container">
         <div class="confirmation-header">
             <div class="icon">✓</div>
@@ -75,7 +171,6 @@
         </div>
     </div>
 
-    <!-- UPDATED JAVASCRIPT (COPY FROM HERE) -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         // 1. Initialize EmailJS
@@ -135,8 +230,13 @@
 
                 try {
                     const orderId = Math.floor(100000 + Math.random() * 900000);
+                    
+                    // Format products for email
+                    const productsList = orderData.products.map(p => 
+                        `${p.quantity} × ${p.name} - ${(p.price * p.quantity).toFixed(2)} PKR`
+                    ).join('<br>');
 
-                    // Send customer email (only essential fields)
+                    // Send customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
@@ -145,12 +245,16 @@
                         email: orderData.email
                     });
 
-                    // Send admin email (only essential fields)
+                    // Send admin email with complete order details
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                        name: orderData.name,
-                        phone: orderData.phone,
-                        email: orderData.email,
-                        total: orderData.total
+                        customer_name: orderData.name,
+                        customer_phone: orderData.phone,
+                        customer_email: orderData.email,
+                        customer_address: orderData.address,
+                        order_id: orderId,
+                        order_total: orderData.total,
+                        order_items: productsList,
+                        order_date: new Date().toLocaleString()
                     });
 
                     window.location.href = 'thankyou.html';
@@ -165,6 +269,5 @@
             });
         });
     </script>
-    <!-- (END OF JAVASCRIPT) -->
 </body>
 </html>
