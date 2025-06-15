@@ -231,47 +231,40 @@
                     const orderId = 'M' + Math.floor(100000 + Math.random() * 900000);
                     const now = new Date();
                     
-                    // Format products for email
-                    const productsList = orderData.products.map(p => 
-                        `${p.quantity}x ${p.name} - ${p.price} PKR (${(p.price * p.quantity).toFixed(2)} PKR)`
-                    ).join('\n');
+                    // Create detailed order summary for emails
+                    const orderSummary = `Order ID: #${orderId}
+Order Date: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}
 
-                    // Prepare complete order details
-                    const orderDetails = `
-ORDER #${orderId}
-DATE: ${now.toLocaleString()}
-
-CUSTOMER DETAILS:
+Customer Details:
 Name: ${orderData.name}
 Phone: ${orderData.phone}
 Email: ${orderData.email}
 Address: ${orderData.address}
 
-ORDER ITEMS:
-${productsList}
+Items Ordered:
+${orderData.products.map(p => 
+    `${p.quantity}x ${p.name} - ${p.price} PKR each = ${(p.price * p.quantity).toFixed(2)} PKR`
+).join('\n')}
 
-TOTAL: ${orderData.total} PKR
-`;
+Total Amount: ${orderData.total} PKR`;
 
                     // Send customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
-                        total: orderData.total,
-                        phone: orderData.phone,
-                        email: orderData.email
+                        order_summary: orderSummary,
+                        phone: orderData.phone
                     });
 
-                    // Send admin email (using simple text format)
+                    // Send admin email
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
                         customer_email: orderData.email,
                         order_id: orderId,
-                        order_details: orderDetails,
+                        order_summary: orderSummary,
                         order_total: orderData.total,
-                        order_date: now.toLocaleDateString(),
-                        order_time: now.toLocaleTimeString()
+                        order_timestamp: now.toLocaleString()
                     });
 
                     window.location.href = 'thankyou.html';
