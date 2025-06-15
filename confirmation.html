@@ -6,165 +6,212 @@
     <title>Order Confirmation - Merimuskan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* YOUR EXISTING CSS (UNCHANGED) */
+        :root {
+            --primary: #4F46E5;  /* Vibrant purple-blue */
+            --secondary: #10B981; /* Fresh green */
+            --accent: #F59E0B;   /* Warm amber */
+            --text: #2C3345;
+            --light-bg: #F0F9FF;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f3fe;
+            background: linear-gradient(135deg, #f3f3fe 0%, #e9f5ff 100%);
             margin: 0;
-            padding: 0;
-            color: #2C3345;
+            padding: 20px;
+            color: var(--text);
         }
+
         .confirmation-container {
-            max-width: 752px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        /* ... (keep all other CSS rules exactly as they were) ... */
+
+        .confirmation-header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .confirmation-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .confirmation-header .icon {
+            font-size: 60px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            text-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .order-summary {
+            background: var(--light-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px dashed rgba(79, 70, 229, 0.3);
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--primary);
+            width: 150px;
+            opacity: 0.9;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .product-item:hover {
+            background: rgba(239, 246, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        .product-item div:first-child {
+            flex: 2;
+        }
+
+        .product-item div:last-child {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .total-section {
+            text-align: right;
+            font-size: 22px;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(to right, #f0fdf4, #ecfdf5);
+            border-radius: 10px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .total-section h3 {
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .back-button {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(79, 70, 229, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .confirm-button {
+            background: linear-gradient(to right, var(--primary), #7C3AED);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s;
+        }
+
+        .confirm-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
         .loading-spinner {
             display: none;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: white;
             animation: spin 1s ease-in-out infinite;
             margin-right: 10px;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* Animated checkmark for fun */
+        .icon {
+            position: relative;
+        }
+        .icon::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.2; }
+            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
         }
     </style>
 </head>
 <body>
-    <!-- YOUR EXISTING HTML STRUCTURE (UNCHANGED) -->
+    <!-- YOUR EXISTING HTML BODY (NO CHANGES NEEDED) -->
     <div class="confirmation-container">
-        <div class="confirmation-header">
-            <div class="icon">✓</div>
-            <h1>Review Your Order</h1>
-            <p>Please verify your information before confirming</p>
-        </div>
-
-        <div class="order-summary">
-            <div class="customer-info">
-                <h2 class="section-title">Customer Information</h2>
-                <div id="customerDetails">
-                    <!-- Filled by JavaScript -->
-                </div>
-            </div>
-
-            <div class="products-summary">
-                <h2 class="section-title">Order Summary</h2>
-                <div id="orderItems">
-                    <!-- Filled by JavaScript -->
-                </div>
-                <div class="total-section">
-                    <h3>Total: <span id="orderTotal">0.00</span> PKR</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="action-buttons">
-            <a href="index.html" class="back-button">Back to Edit</a>
-            <button id="confirmOrder" class="confirm-button">
-                <span id="spinner" class="loading-spinner"></span>
-                Confirm Order
-            </button>
-        </div>
+        <!-- Keep all your existing HTML structure exactly as is -->
+        <!-- Only the CSS above has been enhanced -->
     </div>
 
-    <!-- UPDATED JAVASCRIPT (COPY FROM HERE) -->
+    <!-- YOUR EXISTING JAVASCRIPT (NO CHANGES NEEDED) -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // 1. Initialize EmailJS
-        emailjs.init("iTzoppHcrXT5MN1Iq");
-
-        // 2. Load order data when page opens
-        document.addEventListener('DOMContentLoaded', function() {
-            const orderData = JSON.parse(sessionStorage.getItem('orderData'));
-            if (!orderData) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            // Display customer info
-            document.getElementById('customerDetails').innerHTML = `
-                <div class="info-row">
-                    <div class="info-label">Name:</div>
-                    <div class="info-value">${orderData.name}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Phone:</div>
-                    <div class="info-value">${orderData.phone}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Email:</div>
-                    <div class="info-value">${orderData.email}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Address:</div>
-                    <div class="info-value">${orderData.address}</div>
-                </div>
-            `;
-
-            // Display ordered products
-            const orderItems = document.getElementById('orderItems');
-            orderData.products.forEach(product => {
-                const itemTotal = (product.price * product.quantity).toFixed(2);
-                orderItems.innerHTML += `
-                    <div class="product-item">
-                        <div>
-                            <strong>${product.name}</strong>
-                            <div>${product.quantity} × ${product.price} PKR</div>
-                        </div>
-                        <div>${itemTotal} PKR</div>
-                    </div>
-                `;
-            });
-
-            // Display total
-            document.getElementById('orderTotal').textContent = orderData.total;
-
-            // 3. Handle order confirmation
-            document.getElementById('confirmOrder').addEventListener('click', async function() {
-                const button = this;
-                button.disabled = true;
-                document.getElementById('spinner').style.display = 'inline-block';
-
-                try {
-                    const orderId = Math.floor(100000 + Math.random() * 900000);
-
-                    // Send customer email (only essential fields)
-                    await emailjs.send("service_cor6xnd", "template_3e494ui", {
-                        name: orderData.name,
-                        order_id: orderId,
-                        total: orderData.total,
-                        phone: orderData.phone,
-                        email: orderData.email
-                    });
-
-                    // Send admin email (only essential fields)
-                    await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                        name: orderData.name,
-                        phone: orderData.phone,
-                        email: orderData.email,
-                        total: orderData.total
-                    });
-
-                    window.location.href = 'thankyou.html';
-                } catch (error) {
-                    console.error("Email failed:", error);
-                    alert("Order confirmed! Emails may be delayed.");
-                    window.location.href = 'thankyou.html';
-                } finally {
-                    button.disabled = false;
-                    document.getElementById('spinner').style.display = 'none';
-                }
-            });
-        });
+        // Keep all your existing JavaScript exactly as is
     </script>
-    <!-- (END OF JAVASCRIPT) -->
 </body>
 </html>
