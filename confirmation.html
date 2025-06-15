@@ -173,10 +173,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
-        // Initialize EmailJS
+        // Initialize EmailJS with your User ID
         emailjs.init("iTzoppHcrXT5MN1Iq");
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Get order data from session storage
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
                 window.location.href = 'index.html';
@@ -236,25 +237,32 @@
                         `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
                     ).join('\n');
 
-                    // Create complete order summary
-                    const orderSummary = `CUSTOMER: ${orderData.name}
-PHONE: ${orderData.phone}
-ADDRESS: ${orderData.address}
+                    // Create complete order summary for both emails
+                    const orderSummary = `Order ID: ${orderId}
+Date: ${now.toLocaleDateString()}
+
+CUSTOMER DETAILS:
+Name: ${orderData.name}
+Phone: ${orderData.phone}
+Email: ${orderData.email}
+Address: ${orderData.address}
 
 ORDER ITEMS:
 ${productsText}
-`;
 
-                    // Send customer email
+TOTAL: ${orderData.total} PKR`;
+
+                    // Send customer email with all details
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
+                        order_summary: orderSummary,
                         total: orderData.total,
                         phone: orderData.phone,
                         email: orderData.email
                     });
 
-                    // Send admin email with PERFECTLY MATCHED variables
+                    // Send admin email with all details
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
