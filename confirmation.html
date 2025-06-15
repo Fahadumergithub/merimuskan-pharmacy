@@ -232,47 +232,33 @@
                     const now = new Date();
                     const deliveryArea = orderData.address.split(',')[0].trim();
                     
-                    // Format products for emails
-                    const productsText = orderData.products.map(p => 
-                        `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
-                    ).join('\n');
-
-                    // CUSTOMER EMAIL CONTENT
-                    const customerOrderDetails = `ORDER #${orderId}
-DATE: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}
-
-YOUR ORDER:
-${productsText}
-
-DELIVERY ADDRESS:
-${orderData.address}`;
-
-                    // ADMIN EMAIL CONTENT
-                    const adminOrderSummary = `CUSTOMER: ${orderData.name}
+                    // Create identical order summary for both emails
+                    const orderSummary = `CUSTOMER: ${orderData.name}
 PHONE: ${orderData.phone}
-EMAIL: ${orderData.email}
 ADDRESS: ${orderData.address}
 
 ORDER ITEMS:
-${productsText}`;
+${orderData.products.map(p => 
+    `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.price * p.quantity).toFixed(2)} PKR`
+).join('\n')}`;
 
-                    // Send CUSTOMER email
+                    // Send CUSTOMER email (using same format as admin)
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
+                        order_summary: orderSummary,
                         total: orderData.total,
-                        phone: orderData.phone,
-                        order_details: customerOrderDetails,
-                        delivery_area: deliveryArea
+                        delivery_area: deliveryArea,
+                        phone: orderData.phone
                     });
 
-                    // Send ADMIN email
+                    // Send ADMIN email (identical format)
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
                         customer_phone: orderData.phone,
                         customer_email: orderData.email,
                         order_id: orderId,
-                        order_summary: adminOrderSummary,
+                        order_summary: orderSummary,
                         order_total: orderData.total,
                         order_timestamp: now.toLocaleString()
                     });
