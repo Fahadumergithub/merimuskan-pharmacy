@@ -231,9 +231,17 @@
                 try {
                     const orderId = Math.floor(100000 + Math.random() * 900000);
                     const now = new Date();
-                    const timestamp = now.toLocaleString();
+                    
+                    // Format products array EXACTLY as the template expects
+                    const productsForEmail = orderData.products.map(product => {
+                        return {
+                            name: product.name,
+                            quantity: product.quantity,
+                            price: product.price
+                        };
+                    });
 
-                    // Prepare data for customer email
+                    // Send customer email (unchanged)
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
                         order_id: orderId,
@@ -242,25 +250,21 @@
                         email: orderData.email
                     });
 
-                    // Prepare data for admin email - EXACTLY matching template variables
+                    // Send admin email with PERFECTLY matched variables
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         name: orderData.name,
                         phone: orderData.phone,
                         email: orderData.email,
                         order_id: orderId,
-                        products: orderData.products.map(p => ({
-                            name: p.name,
-                            quantity: p.quantity,
-                            price: p.price
-                        })),
+                        products: productsForEmail,
                         total: orderData.total,
-                        timestamp: timestamp
+                        timestamp: now.toLocaleString()
                     });
 
                     window.location.href = 'thankyou.html';
                 } catch (error) {
                     console.error("Email failed:", error);
-                    alert("Order confirmed! Emails may be delayed.");
+                    alert("Order confirmed! If you don't receive emails, please contact us.");
                     window.location.href = 'thankyou.html';
                 } finally {
                     button.disabled = false;
