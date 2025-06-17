@@ -14,11 +14,25 @@
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/panadol-120ml-liquid.webp"
     },
     {
+        "id": 1002,
+        "name": "Brufen Tablet 400mg",
+        "description": "1 Strip = 10 Tablets",
+        "price": 66.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen400.webp"
+    },
+    {
         "id": 1003,
         "name": "Brufen DS 90ml Suspension",
         "description": "200Mg/5ml",
         "price": 109.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/brufen%20ds.webp"
+    },
+    {
+        "id": 1004,
+        "name": "Ansaid Tablet 100mg",
+        "description": "1 Strip = 10 Tablets",
+        "price": 121.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/ansaid.webp"
     },
     {
         "id": 1005,
@@ -33,20 +47,6 @@
         "description": "457Mg/5Ml",
         "price": 385.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-bd-susp-457m-70ml.webp"
-    }, 
-    {
-        "id": 1002,
-        "name": "Brufen Tablet 400mg",
-        "description": "1 Strip = 10 Tablets",
-        "price": 66.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen400.webp"
-    },
-    {
-        "id": 1004,
-        "name": "Ansaid Tablet 100mg",
-        "description": "1 Strip = 10 Tablets",
-        "price": 121.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/ansaid.webp"
     },
     {
         "id": 1007,
@@ -63,20 +63,6 @@
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagylsyp.webp"
     },
     {
-        "id": 1011,
-        "name": "Prodent Toothpaste",
-        "description": "100 grams",
-        "price": 296.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/prodent-toothpaste.webp"
-    },
-    {
-        "id": 1012,
-        "name": "Hi-Salz Toothpaste",
-        "description": "100 grams",
-        "price": 247.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
-    },
-    {
         "id": 1009,
         "name": "Sensodyne Fluoride Toothpaste",
         "description": "100g",
@@ -89,6 +75,20 @@
         "description": "100 grams",
         "price": 440.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/rapid.webp"
+    },
+    {
+        "id": 1011,
+        "name": "Prodent Toothpaste",
+        "description": "100 grams",
+        "price": 296.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/prodent-toothpaste.webp"
+    },
+    {
+        "id": 1012,
+        "name": "Hi-Salz Toothpaste",
+        "description": "100 grams",
+        "price": 247.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
     },
     {
         "id": 1013,
