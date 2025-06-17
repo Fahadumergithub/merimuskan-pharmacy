@@ -8,14 +8,14 @@
     },
     {
         "id": 1001,
-        "name": "Panadol Childrens",
+        "name": "Panadol Children's",
         "description": "120ml",
         "price": 136.50,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/panadol-120ml-liquid.webp"
     },
     {
         "id": 1003,
-        "name": "Brufen Ds 90Ml Suspension",
+        "name": "Brufen DS 90Ml Suspension",
         "description": "200Mg/5Ml",
         "price": 109.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/brufen%20ds.webp"
@@ -29,21 +29,21 @@
     },
     {
         "id": 1006,
-        "name": "Augmentin Bd 70Ml Suspension",
+        "name": "Augmentin BD 70Ml Suspension",
         "description": "457Mg/5Ml",
         "price": 385.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-bd-susp-457m-70ml.webp"
     },
     {
         "id": 1011,
-        "name": "Prodent Tooth Paste",
+        "name": "Prodent Toothpaste",
         "description": "100 grams",
         "price": 296.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/prodent-toothpaste.webp"
     },
     {
         "id": 1012,
-        "name": "Hi-Salz Tooth Paste",
+        "name": "Hi-Salz Toothpaste",
         "description": "100 grams",
         "price": 247.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
@@ -99,7 +99,7 @@
     },
     {
         "id": 1013,
-        "name": "Secure Junior Tooth Paste",
+        "name": "Secure Junior Toothpaste",
         "description": "60 grams",
         "price": 157.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/secure.webp"
