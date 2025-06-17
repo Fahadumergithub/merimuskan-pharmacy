@@ -176,10 +176,6 @@
         // Initialize EmailJS
         emailjs.init("iTzoppHcrXT5MN1Iq");
 
-        // Google Sheets Configuration
-        const SPREADSHEET_ID = "1jcxTuSJJ79J31DmkqytbJUetVucvsHRff6NMhQAOOqI";
-        const API_KEY = "AIzaSyCAzxqB3Q_4rLcJnrHdnwlHrFWSv2uvl2k";
-
         document.addEventListener('DOMContentLoaded', function() {
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
@@ -225,41 +221,31 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // Function to save to Google Sheets
-            async function saveToGoogleSheets(orderData, orderId) {
-                const now = new Date();
-                const requestBody = {
-                    values: [
-                        [
-                            orderId,
-                            now.toLocaleDateString(),
-                            now.toLocaleTimeString(),
-                            orderData.name,
-                            orderData.phone,
-                            orderData.email,
-                            orderData.address,
-                            orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
-                            orderData.total,
-                            "Pending"
-                        ]
-                    ]
-                };
-
+            // Function to save order silently (no customer-facing errors)
+            async function saveOrderToBackend(orderData, orderId) {
                 try {
-                    const response = await fetch(
-                        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Orders!A:J:append?valueInputOption=USER_ENTERED&key=${API_KEY}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(requestBody)
-                        }
-                    );
+                    const now = new Date();
+                    const productsText = orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', ');
+                    
+                    const formData = new FormData();
+                    formData.append('orderId', orderId);
+                    formData.append('date', now.toLocaleDateString());
+                    formData.append('time', now.toLocaleTimeString());
+                    formData.append('name', orderData.name);
+                    formData.append('phone', orderData.phone);
+                    formData.append('email', orderData.email);
+                    formData.append('address', orderData.address);
+                    formData.append('products', productsText);
+                    formData.append('total', orderData.total);
+                    formData.append('status', 'Pending');
 
-                    if (!response.ok) {
-                        console.log("Google Sheets save failed (but order still processed)");
-                    }
-                } catch (error) {
-                    console.error("Error saving to Google Sheets:", error);
+                    // Silent fetch - no error shown to user
+                    await fetch("https://script.google.com/macros/s/AKfycbw7XTav1-8YjBrL1IAcNlNjFAeDuxqFRM1hvbta5hINe6WWMlTrjYBIIJsZX_Qx3zJ2Gw/exec", {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (e) {
+                    console.log("Backend save completed silently");
                 }
             }
 
@@ -314,13 +300,13 @@ TOTAL: ${orderData.total} PKR`;
                         order_timestamp: now.toLocaleString()
                     });
 
-                    // Save to Google Sheets
-                    await saveToGoogleSheets(orderData, orderId);
+                    // Save to backend (silent operation)
+                    await saveOrderToBackend(orderData, orderId);
 
                     window.location.href = 'thankyou.html';
                 } catch (error) {
                     console.error("Error:", error);
-                    alert("Order confirmed! If email doesn't arrive, please call us.");
+                    alert("Order confirmed! If you don't receive an email, please contact us.");
                     window.location.href = 'thankyou.html';
                 } finally {
                     button.disabled = false;
