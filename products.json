@@ -1,7 +1,7 @@
 [
     {
         "id": 1000,
-        "name": "Panadol Tablets 500Mg",
+        "name": "Panadol Tablets 500mg",
         "description": "1 Strip = 10 Tablets",
         "price": 33.50,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/panadol-500mg-tablets.webp"
@@ -15,21 +15,21 @@
     },
     {
         "id": 1003,
-        "name": "Brufen DS 90Ml Suspension",
-        "description": "200Mg/5Ml",
+        "name": "Brufen DS 90ml Suspension",
+        "description": "200Mg/5ml",
         "price": 109.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/brufen%20ds.webp"
     },
     {
         "id": 1005,
-        "name": "Augmentin Tablet 1G",
+        "name": "Augmentin Tablet 1g",
         "description": "1 Strip = 6 Tablets",
         "price": 338.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-tablets-1gms-6s.webp"
     },
     {
         "id": 1006,
-        "name": "Augmentin BD 70Ml Suspension",
+        "name": "Augmentin BD 70ml Suspension",
         "description": "457Mg/5Ml",
         "price": 385.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-bd-susp-457m-70ml.webp"
@@ -57,21 +57,21 @@
     },
     {
         "id": 1002,
-        "name": "Brufen Tablets 400Mg",
+        "name": "Brufen Tablets 400mg",
         "description": "1 Strip = 10 Tablets",
         "price": 66.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen400.webp"
     },
     {
         "id": 1004,
-        "name": "Ansaid Tablets 100Mg",
+        "name": "Ansaid Tablets 100mg",
         "description": "1 Strip = 10 Tablets",
         "price": 121.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/ansaid.webp"
     },
     {
         "id": 1007,
-        "name": "Flagyl Tablets 400Mg",
+        "name": "Flagyl Tablets 400mg",
         "description": "1 Strip = 10 Tablets",
         "price": 44.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagyl400.webp"
@@ -79,7 +79,7 @@
     {
         "id": 1008,
         "name": "Flagyl 120Ml Suspension",
-        "description": "200Mg/5Ml",
+        "description": "200Mg/5ml",
         "price": 143.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagylsyp.webp"
     },
@@ -107,7 +107,7 @@
     {
         "id": 1014,
         "name": "Enziclor Mouth Wash",
-        "description": "240 ML",
+        "description": "240 ml",
         "price": 351.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/enzicolor.webp"
     },
