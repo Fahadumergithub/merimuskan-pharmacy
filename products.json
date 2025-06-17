@@ -110,12 +110,12 @@
         "description": "Soft",
         "price": 230.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/colgatesoft360.webp"
-    }
+    },
     {
         "id": 1016,
         "name": "Colgate Toothbrush",
         "description": "Kidz",
         "price": 120.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/kidz%20brush.webp"
-    },
+    }
 ]
