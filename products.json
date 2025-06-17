@@ -1,7 +1,7 @@
 [
     {
         "id": 1000,
-        "name": "Panadol Tablets 500mg",
+        "name": "Panadol Tablet 500mg",
         "description": "1 Strip = 10 Tablets",
         "price": 33.50,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/panadol-500mg-tablets.webp"
@@ -36,21 +36,21 @@
     }, 
     {
         "id": 1002,
-        "name": "Brufen Tablets 400mg",
+        "name": "Brufen Tablet 400mg",
         "description": "1 Strip = 10 Tablets",
         "price": 66.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/brufen400.webp"
     },
     {
         "id": 1004,
-        "name": "Ansaid Tablets 100mg",
+        "name": "Ansaid Tablet 100mg",
         "description": "1 Strip = 10 Tablets",
         "price": 121.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/ansaid.webp"
     },
     {
         "id": 1007,
-        "name": "Flagyl Tablets 400mg",
+        "name": "Flagyl Tablet 400mg",
         "description": "1 Strip = 10 Tablets",
         "price": 44.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagyl400.webp"
@@ -77,15 +77,6 @@
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
     },
     {
-        "id": 1016,
-        "name": "Colgate Toothbrush",
-        "description": "Kidz",
-        "price": 120.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/kidz%20brush.webp"
-    },
-   
-    
-    {
         "id": 1009,
         "name": "Sensodyne Fluoride Toothpaste",
         "description": "100g",
@@ -108,7 +99,7 @@
     },
     {
         "id": 1014,
-        "name": "Enziclor Mouth Wash",
+        "name": "Enziclor Mouthwash",
         "description": "240 ml",
         "price": 351.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/enzicolor.webp"
@@ -120,4 +111,11 @@
         "price": 230.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/colgatesoft360.webp"
     }
+    {
+        "id": 1016,
+        "name": "Colgate Toothbrush",
+        "description": "Kidz",
+        "price": 120.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/kidz%20brush.webp"
+    },
 ]
