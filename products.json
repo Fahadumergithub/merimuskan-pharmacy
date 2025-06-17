@@ -33,28 +33,7 @@
         "description": "457Mg/5Ml",
         "price": 385.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/augmentin-bd-susp-457m-70ml.webp"
-    },
-    {
-        "id": 1011,
-        "name": "Prodent Toothpaste",
-        "description": "100 grams",
-        "price": 296.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/prodent-toothpaste.webp"
-    },
-    {
-        "id": 1012,
-        "name": "Hi-Salz Toothpaste",
-        "description": "100 grams",
-        "price": 247.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
-    },
-    {
-        "id": 1016,
-        "name": "Colgate Toothbrush",
-        "description": "Kidz",
-        "price": 120.00,
-        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/kidz%20brush.webp"
-    },
+    }, 
     {
         "id": 1002,
         "name": "Brufen Tablets 400mg",
@@ -83,6 +62,29 @@
         "price": 143.00,
         "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/images/flagylsyp.webp"
     },
+    {
+        "id": 1011,
+        "name": "Prodent Toothpaste",
+        "description": "100 grams",
+        "price": 296.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/prodent-toothpaste.webp"
+    },
+    {
+        "id": 1012,
+        "name": "Hi-Salz Toothpaste",
+        "description": "100 grams",
+        "price": 247.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/hi-salz-tp-100gm-1s.webp"
+    },
+    {
+        "id": 1016,
+        "name": "Colgate Toothbrush",
+        "description": "Kidz",
+        "price": 120.00,
+        "image": "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/refs/heads/main/images/kidz%20brush.webp"
+    },
+   
+    
     {
         "id": 1009,
         "name": "Sensodyne Fluoride Toothpaste",
