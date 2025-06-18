@@ -184,17 +184,17 @@
     <div id="adminSetup" class="admin-setup">
         <strong>Admin: Google Sheets Setup</strong><br>
         <small>This panel is only for the website owner to configure Google Sheets integration.</small><br><br>
-        
+
         <label>Google Sheets API Key:</label>
         <input type="password" id="adminApiKey" class="admin-input" placeholder="Paste your API key here">
-        
+
         <label>Sheet Name:</label>
         <input type="text" id="adminSheetName" class="admin-input" placeholder="Orders" value="Orders">
-        
+
         <button onclick="saveAdminConfig()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Save</button>
         <button onclick="testConnection()" style="margin-top: 10px; padding: 5px 10px; background: #1a73e8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Test Connection</button>
         <button onclick="toggleAdminSetup()" style="margin-top: 10px; padding: 5px 10px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Close</button>
-        
+
         <div id="adminStatus" style="margin-top: 10px; font-size: 10px;"></div>
     </div>
 
@@ -225,7 +225,7 @@
         </div>
 
         <div class="action-buttons">
-            <a href="index.html" class="back-button">Back to Edit</a>
+            <a href="/index.html" class="back-button">Back to Edit</a>
             <button id="confirmOrder" class="confirm-button">
                 <span id="spinner" class="loading-spinner"></span>
                 Confirm Order
@@ -240,45 +240,49 @@
 
         // Configuration
         const SHEETS_CONFIG = {
+            // Your Google Sheet ID. Do NOT change this unless your spreadsheet changes.
             SPREADSHEET_ID: "1gtSL0sw66KFVQqKJDsfQioT1fYe-Tv8drMpd6B70CAM",
-            API_KEY: null,
-            SHEET_NAME: "Orders"
+            API_KEY: null, // This will be loaded from localStorage or entered by admin
+            SHEET_NAME: "Orders" // <--- Assumes you have renamed your sheet to "Orders"
         };
 
-        // Load saved configuration
+        // Load saved configuration for Google Sheets API key and sheet name
         function loadSavedConfig() {
             const saved = localStorage.getItem('merimuskan_sheets_config');
             if (saved) {
                 try {
                     const config = JSON.parse(saved);
                     SHEETS_CONFIG.API_KEY = config.key;
+                    // Use saved sheetName, default to "Orders" if not found
                     SHEETS_CONFIG.SHEET_NAME = config.sheetName || "Orders";
-                    
-                    // Update admin panel
+
+                    // Update admin panel inputs with loaded values
                     const apiKeyInput = document.getElementById('adminApiKey');
                     const sheetNameInput = document.getElementById('adminSheetName');
                     if (apiKeyInput) apiKeyInput.value = config.key;
                     if (sheetNameInput) sheetNameInput.value = SHEETS_CONFIG.SHEET_NAME;
-                    
+
                     return true;
                 } catch (e) {
-                    console.error("Error loading config:", e);
+                    console.error("Error loading config from localStorage:", e);
                     return false;
                 }
             }
             return false;
         }
 
-        // Admin functions
+        // Admin functions to toggle setup panel visibility
         function toggleAdminSetup() {
             const panel = document.getElementById('adminSetup');
             panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Admin function to save API key and sheet name to localStorage
         function saveAdminConfig() {
             const apiKey = document.getElementById('adminApiKey').value.trim();
+            // Default sheet name to "Orders" if input is empty
             const sheetName = document.getElementById('adminSheetName').value.trim() || "Orders";
-            
+
             if (!apiKey) {
                 updateAdminStatus('Please enter your Google Sheets API key', 'error');
                 return;
@@ -286,16 +290,17 @@
 
             SHEETS_CONFIG.API_KEY = apiKey;
             SHEETS_CONFIG.SHEET_NAME = sheetName;
-            
+
             localStorage.setItem('merimuskan_sheets_config', JSON.stringify({
                 key: apiKey,
                 sheetName: sheetName,
-                date: new Date().toISOString()
+                date: new Date().toISOString() // Save timestamp for reference
             }));
 
             updateAdminStatus('✅ Configuration saved successfully!', 'success');
         }
 
+        // Admin function to test connection to Google Sheets API
         async function testConnection() {
             if (!SHEETS_CONFIG.API_KEY) {
                 updateAdminStatus('❌ Please save your API key first', 'error');
@@ -305,38 +310,44 @@
             updateAdminStatus('🔄 Testing connection...', '');
 
             try {
-                // Test with a simple read request to verify API key and sheet access
+                // Construct a URL to read a single cell (A1) from the configured sheet
                 const testUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SPREADSHEET_ID}/values/${SHEETS_CONFIG.SHEET_NAME}!A1:A1?key=${SHEETS_CONFIG.API_KEY}`;
-                
+
                 const response = await fetch(testUrl);
-                
+
                 if (response.ok) {
                     updateAdminStatus('✅ Connection successful! Google Sheets integration is working.', 'success');
                 } else {
                     const errorData = await response.json();
+                    // Display specific error message from Google API if available
                     updateAdminStatus(`❌ Connection failed: ${errorData.error?.message || 'Unknown error'}`, 'error');
                 }
             } catch (error) {
+                // Catch network errors or other unexpected issues
                 updateAdminStatus(`❌ Connection error: ${error.message}`, 'error');
             }
         }
 
+        // Helper function to update the admin status message
         function updateAdminStatus(message, type) {
             const statusDiv = document.getElementById('adminStatus');
             statusDiv.innerHTML = `<div class="status-${type}">${message}</div>`;
         }
 
-        // Load configuration on page start
+        // --- Main Page Logic ---
         document.addEventListener('DOMContentLoaded', function() {
+            // Load configuration when the page loads
             loadSavedConfig();
-            
+
+            // Retrieve order data from session storage
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
-                window.location.href = 'index.html';
+                // If no order data, redirect back to the main order page
+                window.location.href = '/index.html'; // Changed path to root-relative
                 return;
             }
 
-            // Display customer info
+            // Display customer information on the page
             document.getElementById('customerDetails').innerHTML = `
                 <div class="info-row">
                     <div class="info-label">Name:</div>
@@ -356,7 +367,7 @@
                 </div>
             `;
 
-            // Display ordered products
+            // Display ordered products in the summary section
             const orderItems = document.getElementById('orderItems');
             orderData.products.forEach(product => {
                 const itemTotal = (product.price * product.quantity).toFixed(2);
@@ -371,51 +382,59 @@
                 `;
             });
 
-            // Display total
+            // Display the total order amount
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // Function to save to Google Sheets
+            /**
+             * Function to save order data to Google Sheets.
+             * @param {object} orderData - The order data to save.
+             * @param {string} orderId - The unique order ID.
+             * @returns {Promise<{success: boolean, data?: object, error?: object|string, reason?: string, status?: number}>}
+             */
             async function saveToGoogleSheets(orderData, orderId) {
+                // Check if API key and spreadsheet ID are configured
                 if (!SHEETS_CONFIG.API_KEY || !SHEETS_CONFIG.SPREADSHEET_ID) {
-                    console.log("⚠️ Google Sheets not configured - skipping sheet save");
+                    console.warn("⚠️ Google Sheets not configured - skipping sheet save");
                     return { success: false, reason: "not_configured" };
                 }
 
                 const now = new Date();
-                
-                // Format products as a readable string
-                const productsString = orderData.products.map(p => 
+
+                // Format products into a single readable string for the sheet
+                const productsString = orderData.products.map(p =>
                     `${p.quantity}x ${p.name} (${p.price} PKR)`
                 ).join(', ');
 
-                // Prepare data according to your sheet structure
+                // Prepare the row data based on your Google Sheet columns
                 const rowData = [
-                    orderId,                                    // Customer ID (using Order ID)
-                    now.toLocaleDateString('en-GB'),           // Date
-                    now.toLocaleTimeString('en-GB'),           // Time
-                    orderData.name,                            // Customer Name
-                    orderData.phone,                           // Phone
-                    orderData.email,                           // Email
-                    orderData.address,                         // Address
-                    productsString,                            // Products
-                    parseFloat(orderData.total),               // Total Amount
-                    "Pending"                                  // Status
+                    orderId,                                          // Customer ID (using Order ID for simplicity)
+                    now.toLocaleDateString('en-GB'),                  // Date (e.g., 18/06/2025)
+                    now.toLocaleTimeString('en-GB'),                  // Time (e.g., 08:30:00)
+                    orderData.name,                                   // Customer Name
+                    orderData.phone,                                  // Phone
+                    orderData.email,                                  // Email
+                    orderData.address,                                // Address
+                    productsString,                                   // Products (formatted string)
+                    parseFloat(orderData.total),                      // Total Amount (as a number)
+                    "Pending"                                         // Status (default to "Pending")
                 ];
 
+                // Request body for the Google Sheets API append request
                 const requestBody = {
                     values: [rowData]
                 };
 
                 try {
                     console.log("📊 Attempting to save to Google Sheets...");
-                    console.log("Sheet:", SHEETS_CONFIG.SHEET_NAME);
-                    console.log("Data:", rowData);
+                    console.log("Sheet Name:", SHEETS_CONFIG.SHEET_NAME);
+                    console.log("Data to save:", rowData);
 
+                    // Construct the API URL for appending rows
                     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SPREADSHEET_ID}/values/${SHEETS_CONFIG.SHEET_NAME}!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${SHEETS_CONFIG.API_KEY}`;
-                    
+
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: { 
+                        headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(requestBody)
@@ -424,7 +443,7 @@
                     if (response.ok) {
                         const result = await response.json();
                         console.log("✅ Order saved to Google Sheets successfully");
-                        console.log("Response:", result);
+                        console.log("Google Sheets API Response:", result);
                         return { success: true, data: result };
                     } else {
                         const errorData = await response.json();
@@ -432,31 +451,34 @@
                         return { success: false, error: errorData, status: response.status };
                     }
                 } catch (error) {
-                    console.error("❌ Google Sheets error:", error);
+                    // Handle network errors or other exceptions during the fetch
+                    console.error("❌ Google Sheets API request error:", error);
                     return { success: false, error: error.message };
                 }
             }
 
-            // Handle order confirmation
+            // Event listener for the "Confirm Order" button click
             document.getElementById('confirmOrder').addEventListener('click', async function() {
                 const button = this;
+                // Disable button and show spinner during processing
                 button.disabled = true;
                 document.getElementById('spinner').style.display = 'inline-block';
                 button.innerHTML = '<span id="spinner" class="loading-spinner" style="display: inline-block;"></span>Processing...';
 
                 try {
+                    // Generate a unique order ID
                     const orderId = 'MERI-' + Date.now().toString().slice(-6) + Math.floor(100 + Math.random() * 900);
-                    const now = new Date();
-                    
-                    console.log("🚀 Starting order processing...");
-                    console.log("Order ID:", orderId);
+                    const now = new Date(); // Current timestamp
 
-                    // Format products for order summary
-                    const productsText = orderData.products.map(p => 
+                    console.log("🚀 Starting order processing...");
+                    console.log("Generated Order ID:", orderId);
+
+                    // Format products for the email summary
+                    const productsText = orderData.products.map(p =>
                         `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
                     ).join('\n');
 
-                    // Create complete order summary
+                    // Create a comprehensive order summary for emails
                     const orderSummary = `Order ID: ${orderId}
 Date: ${now.toLocaleDateString()}
 
@@ -471,15 +493,17 @@ ${productsText}
 
 TOTAL: ${orderData.total} PKR`;
 
-                    // Try to save to Google Sheets first
+                    // Attempt to save data to Google Sheets first
                     const sheetsResult = await saveToGoogleSheets(orderData, orderId);
                     if (sheetsResult.success) {
-                        console.log("📊 Google Sheets: Success");
+                        console.log("📊 Google Sheets: Data saved successfully.");
                     } else {
-                        console.log("📊 Google Sheets: Failed -", sheetsResult.reason || sheetsResult.error);
+                        console.warn("📊 Google Sheets: Data saving failed or skipped -", sheetsResult.reason || sheetsResult.error);
+                        // Log an error for the user to see in console if sheets failed
+                        // No user-facing alert, as per instructions to avoid alert()
                     }
 
-                    // Send emails
+                    // Send customer confirmation email via EmailJS
                     console.log("📧 Sending customer email...");
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
@@ -489,7 +513,10 @@ TOTAL: ${orderData.total} PKR`;
                         phone: orderData.phone,
                         email: orderData.email
                     });
+                    console.log("✅ Customer email sent.");
 
+
+                    // Send admin notification email via EmailJS
                     console.log("📧 Sending admin email...");
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
                         customer_name: orderData.name,
@@ -500,26 +527,28 @@ TOTAL: ${orderData.total} PKR`;
                         order_total: orderData.total,
                         order_timestamp: now.toLocaleString()
                     });
+                    console.log("✅ Admin email sent.");
 
-                    console.log("✅ Order processing completed successfully");
-                    
-                    // Clear the order data
+
+                    console.log("✅ Order processing completed successfully.");
+
+                    // Clear the order data from session storage after successful processing
                     sessionStorage.removeItem('orderData');
-                    
-                    window.location.href = 'thankyou.html';
+
+                    // Redirect to the thank you page
+                    window.location.href = '/thankyou.html'; // Changed path to root-relative
 
                 } catch (error) {
-                    console.error("❌ Error processing order:", error);
-                    
-                    // Even if there's an error, we'll consider the order confirmed
-                    // since the main goal is achieved
-                    alert("Order confirmation in progress! You will receive an email confirmation shortly. If you don't receive it within 10 minutes, please contact us directly.");
-                    
-                    // Clear the order data and redirect
+                    console.error("❌ An error occurred during order processing (emails/sheets may have failed):", error);
+
+                    // Even if an error occurs (e.g., email failed after sheets succeeded),
+                    // we still want to clear data and redirect to avoid re-submission issues.
+                    // The original code proceeded to thank you page even on error.
                     sessionStorage.removeItem('orderData');
-                    window.location.href = 'thankyou.html';
-                    
+                    window.location.href = '/thankyou.html'; // Changed path to root-relative
+
                 } finally {
+                    // Re-enable button and hide spinner regardless of success or failure
                     button.disabled = false;
                     document.getElementById('spinner').style.display = 'none';
                     button.innerHTML = 'Confirm Order';
@@ -529,3 +558,4 @@ TOTAL: ${orderData.total} PKR`;
     </script>
 </body>
 </html>
+
