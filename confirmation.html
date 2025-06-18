@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmation - Merimuskan</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -133,6 +134,53 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .modal-content p {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: #666;
+        }
+        .modal-content button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .modal-content button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -171,20 +219,60 @@
         </div>
     </div>
 
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <button id="modalCloseButton">OK</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         // Initialize EmailJS
-        emailjs.init("iTzoppHcrXT5MN1Iq");
+        emailjs.init("iTzoppHcrXT5MN1Iq"); // Replace with your actual EmailJS Public Key
 
         // Google Sheets Configuration
         const SPREADSHEET_ID = "1gtSL0sw66KFVQqKJDsfQioT1fYe-Tv8drMpd6B70CAM";
-        const API_KEY = "API_Key";
+        const API_KEY = "AIzaSyBEkpsP3bujyGv7dOmqe5CyDPZkmuaV6ZY"; // <--- IMPORTANT: Replace with your actual Google Sheets API Key
 
         document.addEventListener('DOMContentLoaded', function() {
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
             if (!orderData) {
                 window.location.href = 'index.html';
                 return;
+            }
+
+            // Get modal elements
+            const modal = document.getElementById('myModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalCloseButton = document.getElementById('modalCloseButton');
+
+            // Function to display custom modal message
+            function showModal(title, message, isSuccess = true) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                if (isSuccess) {
+                    modalTitle.style.color = '#4CAF50';
+                } else {
+                    modalTitle.style.color = '#f44336';
+                }
+                modal.style.display = 'flex'; // Use flex to center the modal
+            }
+
+            // Close modal when OK button is clicked
+            modalCloseButton.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            // Close modal if user clicks outside of it
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
             }
 
             // Display customer info
@@ -256,10 +344,13 @@
                     );
 
                     if (!response.ok) {
-                        console.log("Google Sheets save failed (but order still processed)");
+                        const errorText = await response.text();
+                        console.error("Google Sheets save failed (but order still processed):", errorText);
+                        // Errors will be logged to console without interrupting user flow
                     }
                 } catch (error) {
                     console.error("Error saving to Google Sheets:", error);
+                    // Errors will be logged to console without interrupting user flow
                 }
             }
 
@@ -314,14 +405,15 @@ TOTAL: ${orderData.total} PKR`;
                         order_timestamp: now.toLocaleString()
                     });
 
-                    // Save to Google Sheets
+                    // Save to Google Sheets (this will now fail silently if there's an issue with the API key or permissions)
                     await saveToGoogleSheets(orderData, orderId);
 
+                    // Redirect to thank you page after successful operations
                     window.location.href = 'thankyou.html';
                 } catch (error) {
-                    console.error("Error:", error);
-                    alert("Order confirmed! If email doesn't arrive, please call us.");
-                    window.location.href = 'thankyou.html';
+                    console.error("Error during order confirmation:", error);
+                    // Only show modal for critical errors that prevent redirection
+                    showModal("Order Confirmation Failed", "There was an issue confirming your order. Please try again or contact support.", false);
                 } finally {
                     button.disabled = false;
                     document.getElementById('spinner').style.display = 'none';
