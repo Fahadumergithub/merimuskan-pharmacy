@@ -115,8 +115,13 @@
             background: #4CAF50;
             color: white;
             border: none;
+            border-radius: 6px; /* Ensure rounded corners for consistency */
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 16px;
             display: flex;
             align-items: center;
+            justify-content: center; /* Center content in button */
         }
         .confirm-button:hover {
             background: #3e8e41;
@@ -230,13 +235,24 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script>
         // Initialize EmailJS
         emailjs.init("iTzoppHcrXT5MN1Iq"); // Replace with your actual EmailJS Public Key
 
         // Google Sheets Configuration
         const SPREADSHEET_ID = "1gtSL0sw66KFVQqKJDsfQioT1fYe-Tv8drMpd6B70CAM";
-        const API_KEY = "AIzaSyBEkpsP3bujyGv7dOmqe5CyDPZkmuaV6ZY"; // <--- IMPORTANT: Replace with your actual Google Sheets API Key
+        // IMPORTANT: Use your OAuth 2.0 Client ID here
+        const CLIENT_ID = "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"; // <--- Replace with your actual OAuth 2.0 Client ID
+
+        // The API scopes needed to write to Google Sheets
+        // This grants full read/write access to all Sheets the user can access.
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets'; 
+
+        let gapiInited = false;
+        let gisInited = false;
+        let tokenClient;
 
         document.addEventListener('DOMContentLoaded', function() {
             const orderData = JSON.parse(sessionStorage.getItem('orderData'));
@@ -244,6 +260,9 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            const confirmButton = document.getElementById('confirmOrder');
+            const spinner = document.getElementById('spinner');
 
             // Get modal elements
             const modal = document.getElementById('myModal');
@@ -313,64 +332,112 @@
             // Display total
             document.getElementById('orderTotal').textContent = orderData.total;
 
-            // Function to save to Google Sheets
+            // --- Google API Client (gapi) and Google Identity Services (GIS) initialization ---
+            // Load the Google API client library
+            function gapiLoaded() {
+                gapi.load('client', initializeGapiClient);
+            }
+
+            async function initializeGapiClient() {
+                await gapi.client.init({
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                });
+                gapiInited = true;
+                // No immediate action needed here, authorization happens on button click
+            }
+
+            // Load the Google Identity Services library
+            function gisLoaded() {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: '', // Callback will be set during button click
+                });
+                gisInited = true;
+            }
+
+            // Function to save to Google Sheets using gapi
             async function saveToGoogleSheets(orderData, orderId) {
                 const now = new Date();
-                const requestBody = {
-                    values: [
-                        [
-                            orderId,
-                            now.toLocaleDateString(),
-                            now.toLocaleTimeString(),
-                            orderData.name,
-                            orderData.phone,
-                            orderData.email,
-                            orderData.address,
-                            orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
-                            orderData.total,
-                            "Pending"
-                        ]
-                    ]
-                };
+                const testData = [
+                    orderId,
+                    now.toLocaleDateString(),
+                    now.toLocaleTimeString(),
+                    orderData.name,
+                    orderData.phone,
+                    orderData.email,
+                    orderData.address,
+                    orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
+                    orderData.total,
+                    "Pending"
+                ];
 
                 try {
-                    const response = await fetch(
-                        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Orders!A:J:append?valueInputOption=USER_ENTERED&key=${API_KEY}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(requestBody)
+                    const response = await gapi.client.sheets.spreadsheets.values.append({
+                        spreadsheetId: SPREADSHEET_ID,
+                        range: 'Orders!A:J', // The sheet name and range
+                        valueInputOption: 'USER_ENTERED',
+                        resource: {
+                            values: [testData]
                         }
-                    );
+                    });
 
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error("Google Sheets save failed (but order still processed):", errorText);
-                        // Errors will be logged to console without interrupting user flow
+                    if (response.status === 200) { // HTTP 200 OK
+                        console.log('Successfully wrote data to Google Sheet:', response.result);
+                        return true; // Indicate success
+                    } else {
+                        console.error('Google Sheets API Error (Status ' + response.status + '):', response);
+                        return false; // Indicate failure
                     }
                 } catch (error) {
-                    console.error("Error saving to Google Sheets:", error);
-                    // Errors will be logged to console without interrupting user flow
+                    console.error('Error saving to Google Sheets:', error);
+                    return false; // Indicate failure
                 }
             }
 
             // Handle order confirmation
-            document.getElementById('confirmOrder').addEventListener('click', async function() {
-                const button = this;
-                button.disabled = true;
-                document.getElementById('spinner').style.display = 'inline-block';
+            confirmButton.addEventListener('click', async function() {
+                confirmButton.disabled = true;
+                spinner.style.display = 'inline-block';
 
-                try {
-                    const orderId = 'MERI-' + Math.floor(1000 + Math.random() * 9000);
-                    const now = new Date();
-                    
-                    // Format products for order summary
-                    const productsText = orderData.products.map(p => 
-                        `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
-                    ).join('\n');
+                if (!gapiInited || !gisInited) {
+                    showModal("Initialization Error", "Google API libraries not fully loaded. Please refresh the page.", false);
+                    confirmButton.disabled = false;
+                    spinner.style.display = 'none';
+                    return;
+                }
 
-                    // Create complete order summary
-                    const orderSummary = `Order ID: ${orderId}
+                if (!gapi.client.getToken()) {
+                    // Not authorized yet, initiate authorization flow
+                    tokenClient.callback = async (resp) => {
+                        if (resp.error !== undefined) {
+                            console.error("Authorization Error:", resp);
+                            showModal("Authorization Failed", "Could not authorize access to Google Sheets. Please try again.", false);
+                            confirmButton.disabled = false;
+                            spinner.style.display = 'none';
+                            return;
+                        }
+                        // Authorization successful, proceed with order confirmation
+                        await processOrderConfirmation();
+                    };
+                    tokenClient.requestAccessToken({prompt: 'consent'});
+                } else {
+                    // Already authorized, proceed with order confirmation
+                    await processOrderConfirmation();
+                }
+            });
+
+            async function processOrderConfirmation() {
+                const orderId = 'MERI-' + Math.floor(1000 + Math.random() * 9000);
+                const now = new Date();
+                
+                // Format products for order summary
+                const productsText = orderData.products.map(p => 
+                    `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
+                ).join('\n');
+
+                // Create complete order summary
+                const orderSummary = `Order ID: ${orderId}
 Date: ${now.toLocaleDateString()}
 
 CUSTOMER DETAILS:
@@ -384,6 +451,7 @@ ${productsText}
 
 TOTAL: ${orderData.total} PKR`;
 
+                try {
                     // Send customer email
                     await emailjs.send("service_cor6xnd", "template_3e494ui", {
                         name: orderData.name,
@@ -393,6 +461,7 @@ TOTAL: ${orderData.total} PKR`;
                         phone: orderData.phone,
                         email: orderData.email
                     });
+                    console.log("Customer email sent successfully.");
 
                     // Send admin email
                     await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
@@ -404,21 +473,31 @@ TOTAL: ${orderData.total} PKR`;
                         order_total: orderData.total,
                         order_timestamp: now.toLocaleString()
                     });
+                    console.log("Admin email sent successfully.");
 
-                    // Save to Google Sheets (this will now fail silently if there's an issue with the API key or permissions)
-                    await saveToGoogleSheets(orderData, orderId);
+                    // Save to Google Sheets
+                    const sheetsSaveSuccess = await saveToGoogleSheets(orderData, orderId);
+                    if (!sheetsSaveSuccess) {
+                        console.warn("Google Sheets save did not complete successfully. Check console for details.");
+                        // We still proceed to thankyou.html as per your earlier request,
+                        // errors are only logged to console.
+                    }
 
                     // Redirect to thank you page after successful operations
                     window.location.href = 'thankyou.html';
+
                 } catch (error) {
-                    console.error("Error during order confirmation:", error);
-                    // Only show modal for critical errors that prevent redirection
+                    console.error("Error during order confirmation process:", error);
                     showModal("Order Confirmation Failed", "There was an issue confirming your order. Please try again or contact support.", false);
                 } finally {
-                    button.disabled = false;
-                    document.getElementById('spinner').style.display = 'none';
+                    confirmButton.disabled = false;
+                    spinner.style.display = 'none';
                 }
-            });
+            }
+
+            // Load gapi and gis libraries at the start
+            gapiLoaded();
+            gisLoaded();
         });
     </script>
 </body>
