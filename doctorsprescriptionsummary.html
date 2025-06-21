@@ -88,33 +88,62 @@
       display: flex;
       justify-content: space-between;
       margin-top: 32px;
+      gap: 15px;
     }
-    .back-button, .send-button {
+    .action-buttons button, .action-buttons a {
+      flex: 1;
+      text-align: center;
+    }
+    .back-button, .send-button, .copy-button {
       padding: 12px 24px;
       border-radius: 6px;
       font-weight: 500;
       cursor: pointer;
       text-decoration: none;
       font-size: 16px;
+      border: none;
     }
     .back-button {
       background: #f0f0f0;
       color: #333;
-      border: none;
     }
     .send-button {
       background: #4299e1;
       color: white;
-      border: none;
+    }
+    .copy-button {
+      background: #4CAF50;
+      color: white;
     }
     .send-button:hover {
       background: #3182ce;
+    }
+    .copy-button:hover {
+      background: #3e8e41;
     }
     .expiry-notice {
       font-size: 14px;
       color: #666;
       margin-top: 10px;
       font-style: italic;
+    }
+    .qr-section {
+      text-align: center;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    .qr-section h3 {
+      margin-top: 0;
+    }
+    #qrCode img {
+      margin: 0 auto;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
     }
   </style>
 </head>
@@ -148,15 +177,27 @@
       <p>Share this link with your patient to approve the prescription:</p>
       <div class="link-box" id="approvalLink">Generating link...</div>
       <p class="expiry-notice">This link will expire in 7 days</p>
-      <button onclick="copyToClipboard()" class="send-button">Copy Link</button>
+      
+      <div class="button-group">
+        <button onclick="copyToClipboard()" class="copy-button">Copy Link</button>
+        <button id="copyAllDetails" class="copy-button">Copy All Details</button>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <h3>Scan to Share</h3>
+      <div id="qrCode"></div>
     </div>
 
     <div class="action-buttons">
       <a href="doctorsprescriptionportal.html" class="back-button">Back to Edit</a>
-      <button id="sendEmail" class="send-button">Send to Patient</button>
+      <button id="sendEmail" class="send-button">Send to Patient via Email</button>
     </div>
   </div>
 
+  <!-- QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
@@ -213,17 +254,56 @@
       const approvalLink = `${window.location.href.replace('doctorsprescriptionsummary.html', '')}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
       document.getElementById('approvalLink').textContent = approvalLink;
 
-      // Set up email button (manual for now)
+      // Generate QR Code
+      const qr = qrcode(0, 'L');
+      qr.addData(approvalLink);
+      qr.make();
+      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
+
+      // 1. Gmail Draft Generator
       document.getElementById('sendEmail').addEventListener('click', function() {
-        const emailBody = `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review and approve your prescription by clicking this link:\n`
+        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
+        const body = `Dear ${prescriptionData.patientName},\n\n`
+          + `Please review and approve your prescription:\n`
           + `${approvalLink}\n\n`
-          + `This link will expire in 7 days.\n\n`
+          + `Medications Prescribed:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `Total: ${prescriptionData.total} PKR\n\n`
+          + `Doctor's Notes:\n${prescriptionData.prescriptionNotes}\n\n`
           + `Best regards,\n`
-          + `${prescriptionData.doctorName}`;
+          + `${prescriptionData.doctorName}\n`
+          + `Merimuskan Pharmacy`;
         
-        const mailtoLink = `mailto:${prescriptionData.patientEmail}?subject=Your%20Prescription%20Approval&body=${encodeURIComponent(emailBody)}`;
-        window.location.href = mailtoLink;
+        window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
+          encodeURIComponent(subject)
+        }&body=${
+          encodeURIComponent(body)
+        }`;
+      });
+
+      // 2. Copy All Details Button
+      document.getElementById('copyAllDetails').addEventListener('click', function() {
+        const text = `PATIENT PRESCRIPTION\n\n`
+          + `Patient: ${prescriptionData.patientName}\n`
+          + `Email: ${prescriptionData.patientEmail}\n`
+          + `Phone: ${prescriptionData.patientPhone}\n\n`
+          + `APPROVAL LINK:\n${approvalLink}\n\n`
+          + `PRESCRIPTION DETAILS:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `TOTAL: ${prescriptionData.total} PKR\n\n`
+          + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
+          + `Prescribed by: ${prescriptionData.doctorName}\n`
+          + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
+        
+        navigator.clipboard.writeText(text)
+          .then(() => alert('All prescription details copied to clipboard!'))
+          .catch(err => console.error('Copy failed:', err));
       });
     });
 
