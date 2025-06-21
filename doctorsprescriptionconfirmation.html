@@ -140,10 +140,22 @@
       margin: 20px 0;
       border-left: 4px solid #4299e1;
     }
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    #confirmation-content {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="confirmation-container">
+  <div id="loadingState" class="loading-state">
+    <p>Loading your prescription...</p>
+  </div>
+
+  <div id="confirmation-content" class="confirmation-container">
     <div class="confirmation-header">
       <div class="icon">℞</div>
       <h1>Review Your Prescription</h1>
@@ -189,6 +201,9 @@
     emailjs.init("iTzoppHcrXT5MN1Iq");
 
     document.addEventListener('DOMContentLoaded', function() {
+      // Show loading state initially
+      document.getElementById('loadingState').style.display = 'block';
+      
       // Get prescription ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const prescriptionId = urlParams.get('rx');
@@ -199,11 +214,20 @@
         return;
       }
 
-      // Retrieve prescription data (in real app, this would come from server/database)
-      const prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
-      
-      if (!prescriptionData || prescriptionData.prescriptionId !== prescriptionId) {
+      // Retrieve prescription data from localStorage
+      const storedData = localStorage.getItem(`rx-${prescriptionId}`);
+      if (!storedData) {
         alert('Prescription not found or expired');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const prescriptionData = JSON.parse(storedData);
+
+      // Check expiration
+      if (Date.now() > prescriptionData.expires) {
+        localStorage.removeItem(`rx-${prescriptionId}`);
+        alert('Prescription link has expired');
         window.location.href = 'index.html';
         return;
       }
@@ -239,7 +263,11 @@
 
       document.getElementById('orderTotal').textContent = prescriptionData.total;
 
-      // Google Sheets Web App Endpoint (same as your original)
+      // Show content after loading
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('confirmation-content').style.display = 'block';
+
+      // Google Sheets Web App Endpoint
       const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3I8UteyaHx7ajZJAY0Ktv0i3O8GTBGqlff3tNIyD2yCc1-_f_K7yRP6q3JmzVfzy7jg/exec";
 
       async function sendToGoogleSheet(orderData, orderId) {
@@ -304,7 +332,7 @@ ${productsText}
 
 TOTAL: ${prescriptionData.total} PKR`;
 
-          // Send confirmation emails (same as your original with slight modifications)
+          // Send confirmation emails
           await emailjs.send("service_cor6xnd", "template_3e494ui", {
             name: prescriptionData.patientName,
             order_id: prescriptionId,
@@ -326,6 +354,9 @@ TOTAL: ${prescriptionData.total} PKR`;
           });
 
           await sendToGoogleSheet(prescriptionData, prescriptionId);
+
+          // Clear the prescription from storage after approval
+          localStorage.removeItem(`rx-${prescriptionId}`);
 
           window.location.href = 'thankyou.html';
         } catch (error) {
