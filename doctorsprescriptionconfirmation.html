@@ -206,106 +206,114 @@
       
       // Get data from URL
       const urlParams = new URLSearchParams(window.location.search);
-      const encodedData = urlParams.get('data');
-
-      if (!encodedData) {
+      const prescriptionId = urlParams.get('rx');
+      
+      if (!prescriptionId) {
         alert('Invalid prescription link');
         window.location.href = 'index.html';
         return;
       }
 
-      try {
-        const prescriptionData = JSON.parse(atob(encodedData));
-        
-        // Check expiration
-        if (Date.now() > prescriptionData.expires) {
-          alert('Prescription link has expired');
-          window.location.href = 'index.html';
-          return;
+      // Retrieve from localStorage
+      const storedData = localStorage.getItem(`rx-${prescriptionId}`);
+      if (!storedData) {
+        alert('Prescription not found. Please ask your doctor to resend.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const prescriptionData = JSON.parse(storedData);
+      
+      // Check expiration
+      if (Date.now() > prescriptionData.expires) {
+        localStorage.removeItem(`rx-${prescriptionId}`);
+        alert('Prescription link has expired');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Populate doctor details
+      document.getElementById('doctorDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
+        <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
+      `;
+
+      // Populate patient details
+      document.getElementById('patientDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
+        <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
+        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
+        <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
+      `;
+
+      // Populate prescription notes
+      document.getElementById('prescriptionNotes').textContent = 
+        prescriptionData.prescriptionNotes || "No special instructions provided";
+
+      // Populate order items
+      const orderItems = document.getElementById('orderItems');
+      prescriptionData.products.forEach(product => {
+        const itemTotal = (product.price * product.quantity).toFixed(2);
+        orderItems.innerHTML += `
+          <div class="product-item">
+            <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
+            <div>${itemTotal} PKR</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('orderTotal').textContent = prescriptionData.total;
+
+      // Show content after loading
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('confirmation-content').style.display = 'block';
+
+      // Google Sheets Web App Endpoint
+      const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3I8UteyaHx7ajZJAY0Ktv0i3O8GTBGqlff3tNIyD2yCc1-_f_K7yRP6q3JmzVfzy7jg/exec";
+
+      async function sendToGoogleSheet(orderData, orderId) {
+        const now = new Date();
+        const payload = {
+          order_id: orderId,
+          date: now.toLocaleDateString(),
+          time: now.toLocaleTimeString(),
+          name: orderData.patientName,
+          phone: orderData.patientPhone,
+          email: orderData.patientEmail,
+          address: orderData.patientAddress,
+          items: orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
+          total: orderData.total,
+          status: "Approved",
+          doctor: orderData.doctorName,
+          type: "Prescription"
+        };
+
+        try {
+          await fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          console.log("✅ Data sent to Google Sheets");
+        } catch (err) {
+          console.error("❌ Failed to send to Google Sheets:", err);
         }
+      }
 
-        // Populate doctor details
-        document.getElementById('doctorDetails').innerHTML = `
-          <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
-          <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
-        `;
+      // Approve button handler
+      document.getElementById('approvePrescription').addEventListener('click', async function() {
+        const button = this;
+        button.disabled = true;
+        document.getElementById('spinner').style.display = 'inline-block';
 
-        // Populate patient details
-        document.getElementById('patientDetails').innerHTML = `
-          <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
-          <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
-          <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
-          <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
-        `;
-
-        // Populate prescription notes
-        document.getElementById('prescriptionNotes').textContent = 
-          prescriptionData.prescriptionNotes || "No special instructions provided";
-
-        // Populate order items
-        const orderItems = document.getElementById('orderItems');
-        prescriptionData.products.forEach(product => {
-          const itemTotal = (product.price * product.quantity).toFixed(2);
-          orderItems.innerHTML += `
-            <div class="product-item">
-              <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
-              <div>${itemTotal} PKR</div>
-            </div>
-          `;
-        });
-
-        document.getElementById('orderTotal').textContent = prescriptionData.total;
-
-        // Show content after loading
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('confirmation-content').style.display = 'block';
-
-        // Google Sheets Web App Endpoint
-        const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3I8UteyaHx7ajZJAY0Ktv0i3O8GTBGqlff3tNIyD2yCc1-_f_K7yRP6q3JmzVfzy7jg/exec";
-
-        async function sendToGoogleSheet(orderData, orderId) {
+        try {
           const now = new Date();
-          const payload = {
-            order_id: orderId,
-            date: now.toLocaleDateString(),
-            time: now.toLocaleTimeString(),
-            name: orderData.patientName,
-            phone: orderData.patientPhone,
-            email: orderData.patientEmail,
-            address: orderData.patientAddress,
-            items: orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
-            total: orderData.total,
-            status: "Approved",
-            doctor: orderData.doctorName,
-            type: "Prescription"
-          };
+          const productsText = prescriptionData.products.map(p =>
+            `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
+          ).join('\n');
 
-          try {
-            await fetch(GOOGLE_APPS_SCRIPT_URL, {
-              method: "POST",
-              mode: "no-cors",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            });
-            console.log("✅ Data sent to Google Sheets");
-          } catch (err) {
-            console.error("❌ Failed to send to Google Sheets:", err);
-          }
-        }
-
-        // Approve button handler
-        document.getElementById('approvePrescription').addEventListener('click', async function() {
-          const button = this;
-          button.disabled = true;
-          document.getElementById('spinner').style.display = 'inline-block';
-
-          try {
-            const now = new Date();
-            const productsText = prescriptionData.products.map(p =>
-              `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
-            ).join('\n');
-
-            const orderSummary = `Prescription ID: ${prescriptionData.prescriptionId || 'N/A'}
+          const orderSummary = `Prescription ID: ${prescriptionId}
 Approval Date: ${now.toLocaleDateString()}
 
 DOCTOR:
@@ -325,53 +333,51 @@ ${productsText}
 
 TOTAL: ${prescriptionData.total} PKR`;
 
-            // Send confirmation emails
-            await emailjs.send("service_cor6xnd", "template_3e494ui", {
-              name: prescriptionData.patientName,
-              order_id: prescriptionData.prescriptionId || 'N/A',
-              order_summary: orderSummary,
-              total: prescriptionData.total,
-              phone: prescriptionData.patientPhone,
-              email: prescriptionData.patientEmail
-            });
+          // Send confirmation emails
+          await emailjs.send("service_cor6xnd", "template_3e494ui", {
+            name: prescriptionData.patientName,
+            order_id: prescriptionId,
+            order_summary: orderSummary,
+            total: prescriptionData.total,
+            phone: prescriptionData.patientPhone,
+            email: prescriptionData.patientEmail
+          });
 
-            await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-              customer_name: prescriptionData.patientName,
-              customer_phone: prescriptionData.patientPhone,
-              customer_email: prescriptionData.patientEmail,
-              order_id: prescriptionData.prescriptionId || 'N/A',
-              order_summary: orderSummary,
-              order_total: prescriptionData.total,
-              order_timestamp: now.toLocaleString(),
-              doctor_name: prescriptionData.doctorName
-            });
+          await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+            customer_name: prescriptionData.patientName,
+            customer_phone: prescriptionData.patientPhone,
+            customer_email: prescriptionData.patientEmail,
+            order_id: prescriptionId,
+            order_summary: orderSummary,
+            order_total: prescriptionData.total,
+            order_timestamp: now.toLocaleString(),
+            doctor_name: prescriptionData.doctorName
+          });
 
-            await sendToGoogleSheet(prescriptionData, prescriptionData.prescriptionId || 'N/A');
+          await sendToGoogleSheet(prescriptionData, prescriptionId);
 
-            window.location.href = 'thankyou.html';
-          } catch (error) {
-            console.error("Error:", error);
-            alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
-            window.location.href = 'thankyou.html';
-          } finally {
-            button.disabled = false;
-            document.getElementById('spinner').style.display = 'none';
-          }
-        });
+          // Clear the prescription from storage after approval
+          localStorage.removeItem(`rx-${prescriptionId}`);
 
-        // Reject button handler
-        document.getElementById('rejectPrescription').addEventListener('click', function() {
-          if (confirm("Request changes to this prescription? The doctor will be notified.")) {
-            // In a full implementation, we would send an email to the doctor here
-            alert("Your request has been noted. The doctor will contact you shortly.");
-            window.location.href = 'index.html';
-          }
-        });
+          window.location.href = 'thankyou.html';
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
+          window.location.href = 'thankyou.html';
+        } finally {
+          button.disabled = false;
+          document.getElementById('spinner').style.display = 'none';
+        }
+      });
 
-      } catch (e) {
-        alert('Invalid prescription data');
-        window.location.href = 'index.html';
-      }
+      // Reject button handler
+      document.getElementById('rejectPrescription').addEventListener('click', function() {
+        if (confirm("Request changes to this prescription? The doctor will be notified.")) {
+          // In a full implementation, we would send an email to the doctor here
+          alert("Your request has been noted. The doctor will contact you shortly.");
+          window.location.href = 'index.html';
+        }
+      });
     });
   </script>
 </body>
