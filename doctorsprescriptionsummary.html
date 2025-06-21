@@ -206,20 +206,26 @@
         return;
       }
 
-      // Generate a unique prescription ID
-      const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
-      
-      // Store the data with prescription ID and expiration (7 days)
+      // Add expiration timestamp (7 days from now)
       const approvalData = {
         ...prescriptionData,
-        expires: Date.now() + 7*24*60*60*1000 // 7 days expiration
+        expires: Date.now() + 7*24*60*60*1000
       };
-      
-      // Save to localStorage for cross-session access
-      localStorage.setItem(`rx-${prescriptionId}`, JSON.stringify(approvalData));
-      
-      // Clear the session storage as we've moved to localStorage
-      sessionStorage.removeItem('prescriptionData');
+
+      // Encode data for URL
+      const encodedData = btoa(JSON.stringify(approvalData));
+      const approvalLink = `${window.location.href.replace(
+        'doctorsprescriptionsummary.html', 
+        ''
+      )}doctorsprescriptionconfirmation.html?data=${encodedData}`;
+
+      document.getElementById('approvalLink').textContent = approvalLink;
+
+      // Generate QR Code
+      const qr = qrcode(0, 'L');
+      qr.addData(approvalLink);
+      qr.make();
+      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
 
       // Populate prescription details
       document.getElementById('prescriptionDetails').innerHTML = `
@@ -249,16 +255,6 @@
       });
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
-
-      // Generate approval link (just includes the ID)
-      const approvalLink = `${window.location.href.replace('doctorsprescriptionsummary.html', '')}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
-      document.getElementById('approvalLink').textContent = approvalLink;
-
-      // Generate QR Code
-      const qr = qrcode(0, 'L');
-      qr.addData(approvalLink);
-      qr.make();
-      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
 
       // 1. Gmail Draft Generator
       document.getElementById('sendEmail').addEventListener('click', function() {
