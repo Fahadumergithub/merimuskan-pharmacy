@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prescription Summary - Merimuskan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f3fe;
+      margin: 0;
+      padding: 0;
+      color: #2C3345;
+    }
+    .summary-container {
+      max-width: 752px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .summary-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .summary-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 24px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .info-row {
+      display: flex;
+      margin-bottom: 12px;
+    }
+    .info-label {
+      font-weight: 500;
+      width: 150px;
+      color: #666;
+    }
+    .info-value {
+      flex: 1;
+    }
+    .products-summary {
+      margin-top: 24px;
+    }
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .total-section {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #ddd;
+    }
+    .total-section h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .approval-link {
+      background: #f0f7ff;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 30px 0;
+      border-left: 4px solid #4299e1;
+    }
+    .link-box {
+      background: white;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin: 10px 0;
+      word-break: break-all;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+    }
+    .back-button, .send-button {
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .back-button {
+      background: #f0f0f0;
+      color: #333;
+      border: none;
+    }
+    .send-button {
+      background: #4299e1;
+      color: white;
+      border: none;
+    }
+    .send-button:hover {
+      background: #3182ce;
+    }
+  </style>
+</head>
+<body>
+  <div class="summary-container">
+    <div class="summary-header">
+      <h1>Prescription Summary</h1>
+      <p>Review and share this prescription with your patient</p>
+    </div>
+
+    <div class="prescription-info">
+      <h2 class="section-title">Prescription Details</h2>
+      <div id="prescriptionDetails"></div>
+    </div>
+
+    <div class="patient-info">
+      <h2 class="section-title">Patient Information</h2>
+      <div id="patientDetails"></div>
+    </div>
+
+    <div class="products-summary">
+      <h2 class="section-title">Medications</h2>
+      <div id="prescriptionItems"></div>
+      <div class="total-section">
+        <h3>Estimated Total: <span id="prescriptionTotal">0.00</span> PKR</h3>
+      </div>
+    </div>
+
+    <div class="approval-link">
+      <h3>Patient Approval Link</h3>
+      <p>Share this link with your patient to approve the prescription:</p>
+      <div class="link-box" id="approvalLink">Generating link...</div>
+      <button onclick="copyToClipboard()" class="send-button">Copy Link</button>
+    </div>
+
+    <div class="action-buttons">
+      <a href="doctorsprescriptionportal.html" class="back-button">Back to Edit</a>
+      <button id="sendEmail" class="send-button">Send to Patient</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
+      if (!prescriptionData) {
+        window.location.href = 'doctorsprescriptionportal.html';
+        return;
+      }
+
+      // Generate a unique prescription ID
+      const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
+      
+      // Store the data with prescription ID
+      prescriptionData.prescriptionId = prescriptionId;
+      sessionStorage.setItem('prescriptionData', JSON.stringify(prescriptionData));
+
+      // Populate prescription details
+      document.getElementById('prescriptionDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
+        <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
+        <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
+      `;
+
+      // Populate patient details
+      document.getElementById('patientDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
+        <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
+        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
+        <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
+      `;
+
+      // Populate prescription items
+      const prescriptionItems = document.getElementById('prescriptionItems');
+      prescriptionData.products.forEach(product => {
+        const itemTotal = (product.price * product.quantity).toFixed(2);
+        prescriptionItems.innerHTML += `
+          <div class="product-item">
+            <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
+            <div>${itemTotal} PKR</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
+
+      // Generate approval link
+      const approvalLink = `${window.location.href.replace('doctorsprescriptionsummary.html', '')}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
+      document.getElementById('approvalLink').textContent = approvalLink;
+
+      // Set up email button (manual for now)
+      document.getElementById('sendEmail').addEventListener('click', function() {
+        alert(`For now, please manually send this link to the patient:\n\n${approvalLink}\n\nWe'll automate this in the next phase.`);
+      });
+    });
+
+    function copyToClipboard() {
+      const linkText = document.getElementById('approvalLink').textContent;
+      navigator.clipboard.writeText(linkText).then(() => {
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+  </script>
+</body>
+</html>
