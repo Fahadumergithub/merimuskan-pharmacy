@@ -304,27 +304,15 @@
             </div>
             
             <div class="form-group">
-                <label for="validUntil">Valid Until Date <span class="required">*</span></label>
-                <input type="date" id="validUntil" name="validUntil" required>
+                <label for="issuedDate">Issued Date <span class="required">*</span></label>
+                <input type="date" id="issuedDate" name="issuedDate" required>
             </div>
             
             <h2 style="color: #2a4365; margin-bottom: 20px;">Doctor Information</h2>
             
-            <div class="two-column-form">
-                <div class="form-group">
-                    <label for="doctorName">Your Name <span class="required">*</span></label>
-                    <input type="text" id="doctorName" name="doctorName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="doctorLicense">License Number</label>
-                    <input type="text" id="doctorLicense" name="doctorLicense">
-                </div>
-            </div>
-            
             <div class="form-group">
-                <label for="doctorContact">Contact Number <span class="required">*</span></label>
-                <input type="tel" id="doctorContact" name="doctorContact" required>
+                <label for="doctorName">Doctor's Name <span class="required">*</span></label>
+                <input type="text" id="doctorName" name="doctorName" required>
             </div>
             
             <h2 style="color: #2a4365; margin-bottom: 20px;">Patient Information</h2>
@@ -344,6 +332,11 @@
             <div class="form-group">
                 <label for="patientEmail">Patient Email <span class="required">*</span></label>
                 <input type="email" id="patientEmail" name="patientEmail" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="patientAddress">Patient Address <span class="required">*</span></label>
+                <textarea id="patientAddress" name="patientAddress" rows="3" required placeholder="Full delivery address including area/city"></textarea>
             </div>
             
             <div class="total-section">
@@ -616,13 +609,12 @@
             
             const formData = {
                 doctorName: document.getElementById('doctorName').value,
-                doctorLicense: document.getElementById('doctorLicense').value,
-                doctorContact: document.getElementById('doctorContact').value,
                 patientName: document.getElementById('patientName').value,
                 patientPhone: document.getElementById('patientPhone').value,
                 patientEmail: document.getElementById('patientEmail').value,
+                patientAddress: document.getElementById('patientAddress').value,
                 prescriptionNotes: document.getElementById('prescriptionNotes').value,
-                validUntil: document.getElementById('validUntil').value,
+                issuedDate: document.getElementById('issuedDate').value,
                 total: document.getElementById('totalAmount').textContent,
                 products: []
             };
@@ -643,8 +635,14 @@
             window.location.href = 'prescription-summary.html';
         });
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        // Set default issued date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            
+            // Set issued date to today by default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('issuedDate').value = today;
+        });
     </script>
 </body>
 </html>
