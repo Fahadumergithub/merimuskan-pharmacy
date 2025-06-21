@@ -110,6 +110,12 @@
     .send-button:hover {
       background: #3182ce;
     }
+    .expiry-notice {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -141,6 +147,7 @@
       <h3>Patient Approval Link</h3>
       <p>Share this link with your patient to approve the prescription:</p>
       <div class="link-box" id="approvalLink">Generating link...</div>
+      <p class="expiry-notice">This link will expire in 7 days</p>
       <button onclick="copyToClipboard()" class="send-button">Copy Link</button>
     </div>
 
@@ -161,9 +168,17 @@
       // Generate a unique prescription ID
       const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
       
-      // Store the data with prescription ID
-      prescriptionData.prescriptionId = prescriptionId;
-      sessionStorage.setItem('prescriptionData', JSON.stringify(prescriptionData));
+      // Store the data with prescription ID and expiration (7 days)
+      const approvalData = {
+        ...prescriptionData,
+        expires: Date.now() + 7*24*60*60*1000 // 7 days expiration
+      };
+      
+      // Save to localStorage for cross-session access
+      localStorage.setItem(`rx-${prescriptionId}`, JSON.stringify(approvalData));
+      
+      // Clear the session storage as we've moved to localStorage
+      sessionStorage.removeItem('prescriptionData');
 
       // Populate prescription details
       document.getElementById('prescriptionDetails').innerHTML = `
@@ -194,13 +209,21 @@
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // Generate approval link
+      // Generate approval link (just includes the ID)
       const approvalLink = `${window.location.href.replace('doctorsprescriptionsummary.html', '')}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
       document.getElementById('approvalLink').textContent = approvalLink;
 
       // Set up email button (manual for now)
       document.getElementById('sendEmail').addEventListener('click', function() {
-        alert(`For now, please manually send this link to the patient:\n\n${approvalLink}\n\nWe'll automate this in the next phase.`);
+        const emailBody = `Dear ${prescriptionData.patientName},\n\n`
+          + `Please review and approve your prescription by clicking this link:\n`
+          + `${approvalLink}\n\n`
+          + `This link will expire in 7 days.\n\n`
+          + `Best regards,\n`
+          + `${prescriptionData.doctorName}`;
+        
+        const mailtoLink = `mailto:${prescriptionData.patientEmail}?subject=Your%20Prescription%20Approval&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoLink;
       });
     });
 
