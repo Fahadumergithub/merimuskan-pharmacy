@@ -1,606 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prescription Summary - Merimuskan</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f3f3fe;
-      margin: 0;
-      padding: 0;
-      color: #2C3345;
-    }
-    .summary-container {
-      max-width: 752px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    .summary-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    .summary-header h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 600;
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 24px 0 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #eee;
-    }
-    .info-row {
-      display: flex;
-      margin-bottom: 12px;
-    }
-    .info-label {
-      font-weight: 500;
-      width: 150px;
-      color: #666;
-    }
-    .info-value {
-      flex: 1;
-    }
-    .products-summary {
-      margin-top: 24px;
-    }
-    .product-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .total-section {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #ddd;
-    }
-    .total-section h3 {
-      margin: 0;
-      font-size: 18px;
-    }
-    .approval-link {
-      background: #f0f7ff;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 30px 0;
-      border-left: 4px solid #4299e1;
-    }
-    .link-box {
-      background: white;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      margin: 10px 0;
-      word-break: break-all;
-    }
-    .action-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 32px;
-      gap: 15px;
-    }
-    .action-buttons button, .action-buttons a {
-      flex: 1;
-      text-align: center;
-    }
-    .back-button, .send-button, .copy-button {
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      font-size: 16px;
-      border: none;
-    }
-    .back-button {
-      background: #f0f0f0;
-      color: #333;
-    }
-    .send-button {
-      background: #4299e1;
-      color: white;
-    }
-    .copy-button {
-      background: #4CAF50;
-      color: white;
-    }
-    .send-button:hover {
-      background: #3182ce;
-    }
-    .copy-button:hover {
-      background: #3e8e41;
-    }
-    .expiry-notice {
-      font-size: 14px;
-      color: #666;
-      margin-top: 10px;
-      font-style: italic;
-    }
-    .qr-section {
-      text-align: center;
-      margin: 20px 0;
-      padding: 15px;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-    .qr-section h3 {
-      margin-top: 0;
-    }
-    #qrCode img {
-      margin: 0 auto;
-    }
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .url-warning {
-      font-size: 14px;
-      color: #666;
-      font-style: italic;
-      margin-top: 5px;
-    }
-    .opg-section {
-      margin: 20px 0;
-      padding: 15px;
-      background: #fff8e6;
-      border-radius: 8px;
-      border-left: 4px solid #ffc107;
-    }
-    .opg-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .opg-checkbox input {
-      width: 18px;
-      height: 18px;
-    }
-    .opg-discount-img {
-      max-width: 100%;
-      height: auto;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approve Your Prescription - Merimuskan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f3fe;
+      margin: 0;
+      padding: 0;
+      color: #2C3345;
+    }
+    .container {
+      max-width: 752px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    h1, h2, h3, h4 {
+      margin: 0;
+    }
+    .summary-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .summary-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 24px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .info-row {
+      display: flex;
+      margin-bottom: 12px;
+    }
+    .info-label {
+      font-weight: 500;
+      width: 150px;
+      color: #666;
+    }
+    .info-value {
+      flex: 1;
+    }
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .total-section {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #ddd;
+    }
+    .total-section h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      gap: 15px;
+    }
+    .action-buttons button {
+      flex: 1;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+      border: none;
+    }
+    .approve-button {
+      background: #4CAF50;
+      color: white;
+    }
+    .reject-button {
+      background: #f44336;
+      color: white;
+    }
+    .spinner {
+      display: none;
+      margin-left: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="summary-container">
-    <div class="summary-header">
-      <h1>Prescription Summary</h1>
-      <p>Review and share this prescription with your patient</p>
-    </div>
+  <div class="container">
+    <div class="summary-header">
+      <h1>Approve Your Prescription</h1>
+      <p>Review the prescription below and click approve if correct</p>
+    </div>
 
-    <div class="prescription-info">
-      <h2 class="section-title">Prescription Details</h2>
-      <div id="prescriptionDetails"></div>
-    </div>
+    <div class="section-title">Prescription Details</div>
+    <div id="prescriptionDetails"></div>
 
-    <div class="patient-info">
-      <h2 class="section-title">Patient Information</h2>
-      <div id="patientDetails"></div>
-    </div>
+    <div class="section-title">Patient Information</div>
+    <div id="patientDetails"></div>
 
-    <div class="products-summary">
-      <h2 class="section-title">Medications</h2>
-      <div id="prescriptionItems"></div>
-      <div class="total-section">
-        <h3>Estimated Total: <span id="prescriptionTotal">0.00</span> PKR</h3>
-      </div>
-    </div>
+    <div class="section-title">Medications</div>
+    <div id="prescriptionItems"></div>
+    <div class="total-section">
+      <h3>Total: <span id="prescriptionTotal">0.00</span> PKR</h3>
+    </div>
 
-    <div class="opg-section">
-      <h3>Additional Services</h3>
-      <div class="opg-checkbox">
-        <input type="checkbox" id="opgCheckbox">
-        <label for="opgCheckbox">Prescribe OPG X-Ray (Panoramic Dental Imaging)</label>
-      </div>
-      <div id="opgDiscountContent" style="display: none;">
-        <p>We've included a discount coupon for your OPG X-Ray service. This advanced imaging provides a complete view of your upper and lower jaws, teeth, and surrounding structures.</p>
-        <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png" alt="OPG Discount Coupon" class="opg-discount-img">
-        <p>Present this coupon at our imaging center to receive your discount.</p>
-      </div>
-    </div>
+    <div class="action-buttons">
+      <button id="approvePrescription" class="approve-button">Approve <span id="spinner">⏳</span></button>
+      <button id="rejectPrescription" class="reject-button">Request Changes</button>
+    </div>
+  </div>
 
-    <div class="approval-link">
-      <h3>Patient Approval Link</h3>
-      <p>Share this link with your patient to approve the prescription:</p>
-      <div class="link-box" id="approvalLink">Generating link...</div>
-      <p class="expiry-notice">This link will expire in 7 days</p>
-      
-      <div class="button-group">
-        <button onclick="copyToClipboard()" class="copy-button">Copy Link</button>
-        <button id="copyAllDetails" class="copy-button">Copy All Details</button>
-      </div>
-    </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const prescriptionId = urlParams.get('rx');
+      if (!prescriptionId) return;
 
-    <div class="qr-section">
-      <h3>Scan to Share</h3>
-      <div id="qrCode"></div>
-    </div>
+      try {
+        const response = await fetch(`https://fahadumergithub.github.io/merimuskan-pharmacy/rx-${prescriptionId}.json`);
+        if (!response.ok) throw new Error('Prescription not found');
+        const prescriptionData = await response.json();
 
-    <div class="action-buttons">
-      <a href="doctorsprescriptionportal.html" class="back-button">Back to Edit</a>
-      <button id="sendEmail" class="send-button">Send via Email</button>
-    </div>
-  </div>
+        document.getElementById('prescriptionDetails').innerHTML = `
+          <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
+          <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
+          <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
+        `;
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-  <script>
-    // Helper function to generate random RX ID
-    function generateRxId() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let result = 'RX-';
-      for (let i = 0; i < 6; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    }
+        document.getElementById('patientDetails').innerHTML = `
+          <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
+          <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
+          <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
+          <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
+        `;
 
-    // Initialize IndexedDB
-    function initDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open('PrescriptionDB', 1);
-        
-        request.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          if (!db.objectStoreNames.contains('prescriptions')) {
-            const store = db.createObjectStore('prescriptions', { keyPath: 'id' });
-            store.createIndex('expires', 'expires', { unique: false });
-          }
-        };
-        
-        request.onsuccess = (event) => {
-          resolve(event.target.result);
-        };
-        
-        request.onerror = (event) => {
-          reject('IndexedDB error: ' + event.target.error);
-        };
-      });
-    }
+        const prescriptionItems = document.getElementById('prescriptionItems');
+        prescriptionData.products.forEach(product => {
+          const itemTotal = (product.price * product.quantity).toFixed(2);
+          prescriptionItems.innerHTML += `
+            <div class="product-item">
+              <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
+              <div>${itemTotal} PKR</div>
+            </div>
+          `;
+        });
 
-    // Store prescription in IndexedDB
-    async function storePrescription(prescriptionData) {
-      try {
-        const db = await initDB();
-        const tx = db.transaction('prescriptions', 'readwrite');
-        const store = tx.objectStore('prescriptions');
-        
-        // Set expiration date (7 days from now)
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 7);
-        
-        const rxId = generateRxId();
-        const prescriptionWithMeta = {
-          ...prescriptionData,
-          id: rxId,
-          expires: expirationDate.getTime()
-        };
-        
-        store.put(prescriptionWithMeta);
-        
-        return new Promise((resolve, reject) => {
-          tx.oncomplete = () => resolve(rxId);
-          tx.onerror = (event) => reject(event.target.error);
-        });
-      } catch (error) {
-        console.error('Error storing prescription:', error);
-        throw error;
-      }
-    }
-
-    // Function to retrieve prescription from IndexedDB
-    async function getPrescription(rxId) {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const db = await initDB();
-          const tx = db.transaction('prescriptions', 'readonly');
-          const store = tx.objectStore('prescriptions');
-          const request = store.get(rxId);
-          
-          request.onsuccess = () => {
-            const prescription = request.result;
-            if (prescription && prescription.expires > Date.now()) {
-              resolve(prescription);
-            } else {
-              resolve(null); // Prescription not found or expired
-            }
-          };
-          request.onerror = (event) => {
-            reject(event.target.error);
-          };
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', async function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const rxIdFromUrl = urlParams.get('rx');
-      let prescriptionData = null;
-
-      if (rxIdFromUrl) {
-        // If an RX ID is in the URL, try to load from IndexedDB
-        prescriptionData = await getPrescription(rxIdFromUrl);
-        if (!prescriptionData) {
-          alert('Prescription not found or has expired.');
-          // Optionally redirect or show an error page
-          // window.location.href = 'error.html'; 
-          return; // Stop execution if prescription not found
-        }
-        // If loaded from DB, make sure approval link is current for display
-        const baseUrl = window.location.href.split('/').slice(0, -1).join('/') + '/';
-        const approvalLink = `${baseUrl}doctorsprescriptionconfirmation.html?rx=${rxIdFromUrl}`;
-        document.getElementById('approvalLink').textContent = approvalLink;
-        // Generate QR Code for the existing RX ID
-        const qr = qrcode(0, 'L');
-        qr.addData(approvalLink);
-        qr.make();
-        const qrCodeImg = qr.createImgTag(4);
-        document.getElementById('qrCode').innerHTML = qrCodeImg;
-        // Hide OPG section if not included in the stored prescription (optional, but good for consistency)
-        if (!prescriptionData.opgIncluded) {
-          document.querySelector('.opg-section').style.display = 'none';
-        } else {
-            document.getElementById('opgCheckbox').checked = true;
-            document.getElementById('opgDiscountContent').style.display = 'block';
-        }
-
-      } else {
-        // If no RX ID in URL, it means this is the initial summary page
-        prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
-        if (!prescriptionData) {
-          window.location.href = 'doctorsprescriptionportal.html';
-          return;
-        }
-
-        // Store the new prescription and get the generated RX ID
-        const rxId = await storePrescription(prescriptionData);
-        const baseUrl = window.location.href.split('/').slice(0, -1).join('/') + '/';
-        const approvalLink = `${baseUrl}doctorsprescriptionconfirmation.html?rx=${rxId}`;
-
-        document.getElementById('approvalLink').textContent = approvalLink;
-
-        // Generate QR Code
-        const qr = qrcode(0, 'L');
-        qr.addData(approvalLink);
-        qr.make();
-        const qrCodeImg = qr.createImgTag(4);
-        document.getElementById('qrCode').innerHTML = qrCodeImg;
-      }
-
-      // OPG Checkbox functionality
-      const opgCheckbox = document.getElementById('opgCheckbox');
-      const opgDiscountContent = document.getElementById('opgDiscountContent');
-      
-      opgCheckbox.addEventListener('change', function() {
-        opgDiscountContent.style.display = this.checked ? 'block' : 'none';
-        // Update the prescriptionData to reflect OPG selection before sending email
-        if (prescriptionData) {
-          prescriptionData.opgIncluded = this.checked;
-        }
-      });
-
-      // Set initial state of OPG checkbox based on loaded data
-      if (prescriptionData.opgIncluded) {
-        opgCheckbox.checked = true;
-        opgDiscountContent.style.display = 'block';
-      }
-
-      // Populate prescription details
-      document.getElementById('prescriptionDetails').innerHTML = `
-        <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
-        <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
-        <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
-      `;
-
-      // Populate patient details
-      document.getElementById('patientDetails').innerHTML = `
-        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
-        <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
-        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
-        <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
-      `;
-
-      // Populate prescription items
-      const prescriptionItems = document.getElementById('prescriptionItems');
-      prescriptionData.products.forEach(product => {
-        const itemTotal = (product.price * product.quantity).toFixed(2);
-        prescriptionItems.innerHTML += `
-          <div class="product-item">
-            <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
-            <div>${itemTotal} PKR</div>
-          </div>
-        `;
-      });
-
-      document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
-
-      // Email Integration with embedded OPG image
-      document.getElementById('sendEmail').addEventListener('click', async function() {
-        const opgChecked = opgCheckbox.checked;
-        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
-        
-        // Get OPG image as base64 if checked
-        let opgImageBase64 = '';
-        if (opgChecked) {
-          try {
-            opgImageBase64 = await getImageAsBase64("https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png");
-          } catch (error) {
-            console.error('Error loading OPG image:', error);
-          }
-        }
-
-        // Get the approval link currently displayed
-        const currentApprovalLink = document.getElementById('approvalLink').textContent;
-
-        // Create HTML email body
-        let body = `
-          <html>
-          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
-            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
-              <h2 style="color: #2C3345; margin-top: 0;">Prescription Ready for Review</h2>
-              
-              <p>Dear ${prescriptionData.patientName},</p>
-              
-              <p>Dr. ${prescriptionData.doctorName} has prepared your prescription. Please review and approve it at your earliest convenience.</p>
-              
-              <div style="text-align: center; margin: 25px 0;">
-                <a href="${currentApprovalLink}" style="background-color: #4299e1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-                  View Your Prescription
-                </a>
-              </div>
-              
-              <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <h3 style="margin-top: 0;">Prescription Summary</h3>
-                <ul style="padding-left: 20px; list-style-type: none;">
-                  ${prescriptionData.products.map(p => 
-                    `<li style="margin-bottom: 8px;">• ${p.name} <small>(${p.quantity} × ${p.price} PKR)</small></li>`
-                  ).join('')}
-                </ul>
-                <p style="text-align: right; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px;">
-                  Total: ${prescriptionData.total} PKR
-                </p>
-              </div>
-              
-              ${prescriptionData.prescriptionNotes ? `
-              <div style="background: #f0f7ff; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #4299e1;">
-                <h4 style="margin-top: 0;">Doctor's Notes</h4>
-                <p>${prescriptionData.prescriptionNotes}</p>
-              </div>
-              ` : ''}
-              
-              ${opgChecked ? `
-              <div style="background: #fff8e6; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;">
-                <h4 style="margin-top: 0;">OPG X-Ray Recommended</h4>
-                <p>Your prescription includes an OPG X-Ray service. Please present this coupon at our imaging center:</p>
-                ${opgImageBase64 ? 
-                  `<img src="${opgImageBase64}" alt="OPG Discount" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">` : 
-                  `<p>Discount coupon available at our imaging center</p>`}
-              </div>
-              ` : ''}
-              
-              <div style="text-align: center; margin-top: 30px;">
-                <small style="color: #666;">This prescription link will expire on ${new Date(prescriptionData.expires).toLocaleDateString()}</small>
-              </div>
-            </div>
-            
-            <p style="text-align: center; color: #666; margin-top: 20px;">
-              <small>Merimuskan Pharmacy • ${new Date().getFullYear()}</small>
-            </p>
-          </body>
-          </html>
-        `;
-
-        // Plain text fallback
-        let plainTextBody = `Prescription from Dr. ${prescriptionData.doctorName}\n\n`
-          + `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review your prescription by clicking the link below:\n\n`
-          + `Link: ${currentApprovalLink}\n\n` // Include the link directly in plain text
-          + `Medications:\n${
-            prescriptionData.products.map(p => 
-              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
-            ).join('\n')
-          }\n\n`
-          + `Total: ${prescriptionData.total} PKR\n\n`
-          + (prescriptionData.prescriptionNotes ? `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n` : '')
-          + (opgChecked ? `OPG X-Ray Recommended - Please ask for your discount coupon at our imaging center\n\n` : '')
-          + `This link expires on ${new Date(prescriptionData.expires).toLocaleDateString()}\n\n`
-          + `Merimuskan Pharmacy`;
-
-        // Prepare email with data URI for HTML body
-        const mailtoUrl = `mailto:${encodeURIComponent(prescriptionData.patientEmail)}` +
-          `?subject=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(plainTextBody)}` + // Use plain text for body, as HTML in mailto is tricky
-          `&bcc=merimuskanconnect@gmail.com`;
-
-        // For a richer HTML email experience, a backend is generally required to send emails
-        // However, for client-side mailto, we must stick to plain text for the body to ensure compatibility.
-        // The 'gmailUrl' approach using `view=cm&fs=1` is a better way to pre-fill a rich email,
-        // but it still relies on the email client's interpretation of HTML.
-
-        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
-          `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
-          `&su=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(body)}` + // Attempt to include HTML body for Gmail, though it might strip tags
-          `&bcc=merimuskanconnect@gmail.com`;
-
-        // Try to open Gmail
-        const newWindow = window.open(gmailComposeUrl, '_blank');
-        
-        // Fallback to mailto if Gmail tab doesn't open or is closed quickly
-        setTimeout(() => {
-          if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-            // Fallback to basic mailto if the Gmail pop-up fails or is blocked
-            window.location.href = mailtoUrl;
-          }
-        }, 500); // Give a brief moment for the new window to open
-      });
-
-      // Copy All Details Button
-      document.getElementById('copyAllDetails').addEventListener('click', function() {
-        const opgChecked = opgCheckbox.checked;
-        const currentApprovalLink = document.getElementById('approvalLink').textContent;
-        const text = `PRESCRIPTION DETAILS\n\nPatient: ${prescriptionData.patientName}\n\n` +
-          `APPROVAL LINK:\n${currentApprovalLink}\n\n` +
-          `MEDICATIONS:\n${
-            prescriptionData.products.map(p => 
-              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
-            ).join('\n')
-          }\n\n` +
-          `TOTAL: ${prescriptionData.total} PKR\n\n` +
-          (prescriptionData.prescriptionNotes ? `NOTES: ${prescriptionData.prescriptionNotes}\n\n` : '') +
-          (opgChecked ? `OPG X-RAY INCLUDED\nAsk for discount coupon at imaging center\n\n` : '') +
-          `Prescribed by: ${prescriptionData.doctorName}\n` +
-          `Expires: ${new Date(prescriptionData.expires).toLocaleDateString()}`;
-        
-        navigator.clipboard.writeText(text)
-          .then(() => alert('All details copied to clipboard!'))
-          .catch(err => console.error('Copy failed:', err));
-      });
-    });
-
-    // Helper function to get image as base64
-    function getImageAsBase64(url) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-    }
-
-    function copyToClipboard() {
-      const linkText = document.getElementById('approvalLink').textContent;
-      navigator.clipboard.writeText(linkText).then(() => {
-        alert('Link copied to clipboard!');
-      }).catch(err => {
-        console.error('Failed to copy: ', err);
-      });
-    }
-  </script>
+        document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
+      } catch (error) {
+        console.error('Failed to load prescription:', error);
+      }
+    });
+  </script>
 </body>
 </html>
