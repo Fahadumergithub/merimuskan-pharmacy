@@ -1,4 +1,4 @@
-name: Save Prescription
+name: Update Prescription
 
 on:
   workflow_dispatch:
@@ -11,32 +11,48 @@ on:
         required: true
 
 jobs:
-  update-file:
+  update-prescription:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Get full history to avoid issues
 
-      - name: Fetch and Update prescriptions.json
+      - name: Setup jq
+        uses: extractions/setup-jq@v1
+        with:
+          version: '1.6'
+
+      - name: Update prescriptions.json
         run: |
-          rxid="${{ github.event.inputs.rxId }}"
-          json_data='${{ github.event.inputs.data }}'
+          # Check if file exists, if not create empty JSON
+          if [ ! -f "prescriptions.json" ]; then
+            echo "{}" > prescriptions.json
+          fi
 
-          echo "Fetching prescriptions.json..."
-          curl -s https://raw.githubusercontent.com/${{ github.repository }}/main/prescriptions.json -o prescriptions.json || echo "{}" > prescriptions.json
+          # Update the JSON file
+          jq --arg key "${{ github.event.inputs.rxId }}" \
+             --argjson value "${{ github.event.inputs.data }}" \
+             '.[$key] = $value' prescriptions.json > temp.json && mv temp.json prescriptions.json
 
-          echo "Updating prescriptions.json..."
-          jq --arg key "$rxid" --argjson value "$json_data" '. + {($key): $value}' prescriptions.json > updated.json
-          mv updated.json prescriptions.json
+          # Validate the updated file
+          jq empty prescriptions.json
 
-      - name: Commit and Push to repository
+      - name: Commit and push changes
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           git add prescriptions.json
-          git commit -m "Added prescription: ${{ github.event.inputs.rxId }}" || echo "No changes to commit"
-
-          git push https://x-access-token:${GH_PAT}@github.com/Fahadumergithub/merimuskan-pharmacy.git HEAD:main
+          
+          # Only commit if there are changes
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit"
+          else
+            git commit -m "Updated prescription: ${{ github.event.inputs.rxId }}"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
