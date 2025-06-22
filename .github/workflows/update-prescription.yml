@@ -38,5 +38,5 @@ jobs:
 
           git add prescriptions.json
           git commit -m "Added prescription: ${{ github.event.inputs.rxId }}" || echo "No changes to commit"
-          
-          git push https://x-access-token:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git HEAD:main
+
+          git push https://x-access-token:${GH_PAT}@github.com/Fahadumergithub/merimuskan-pharmacy.git HEAD:main
