@@ -155,6 +155,11 @@
       color: #4299e1;
       font-weight: 500;
     }
+    .prescription-id {
+      font-weight: 600;
+      color: #2C3345;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -186,8 +191,9 @@
       <h3>Patient Approval Link</h3>
       <p>Share this link with your patient to approve the prescription:</p>
       <div class="link-box" id="approvalLink">Generating link...</div>
+      <div class="prescription-id">Prescription ID: <span id="prescriptionIdDisplay"></span></div>
       <p class="expiry-notice">This link will expire in 7 days</p>
-      <p class="url-warning">Note: My Merimuskan e-Prescription links are secure and contain your prescription data</p>
+      <p class="url-warning">My Merimuskan e-Prescription links are secure and contain your prescription data</p>
       
       <div class="button-group">
         <button onclick="copyToClipboard()" class="copy-button">Copy Link</button>
@@ -215,27 +221,32 @@
         return;
       }
 
-      // Generate friendly URL
+      // Generate prescription ID and clean URL
       const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
-      const patientNameSlug = prescriptionData.patientName.replace(/\s+/g, '-').toLowerCase();
+      const patientNameSlug = prescriptionData.patientName.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      
+      // Create clean URL
       const approvalLink = `${window.location.origin}${window.location.pathname.replace(
         'doctorsprescriptionsummary.html', 
         ''
       )}e-prescription/${patientNameSlug}/${prescriptionId}`;
 
-      // Store data as before
+      // Store data with expiration
       localStorage.setItem(`rx-${prescriptionId}`, JSON.stringify({
         ...prescriptionData,
-        expires: Date.now() + 7*24*60*60*1000
+        expires: Date.now() + 7*24*60*60*1000 // 7 days
       }));
 
-      // Update the display
+      // Display the clean URL and prescription ID
       document.getElementById('approvalLink').innerHTML = `
         <div class="friendly-url">${approvalLink}</div>
         <div style="font-size:14px;color:#666;margin-top:5px;">
           My Merimuskan e-Prescription
         </div>
       `;
+      document.getElementById('prescriptionIdDisplay').textContent = prescriptionId;
 
       // Generate QR Code
       const qr = qrcode(0, 'L');
@@ -303,6 +314,9 @@
               <img src="${qrCodeDataUrl}" alt="e-Prescription QR Code" style="width: 150px; height: 150px;">
             </div>
             
+            <h3 style="color: #2C3345;">Prescription ID:</h3>
+            <p>${prescriptionId}</p>
+            
             <h3 style="color: #2C3345;">Medications:</h3>
             <ul>
               ${prescriptionData.products.map(p => 
@@ -324,7 +338,8 @@
         // Plain text fallback
         const textBody = `Dear ${prescriptionData.patientName},\n\n` +
           `You've received a new e-Prescription from Dr. ${prescriptionData.doctorName} at Merimuskan Pharmacy.\n\n` +
-          `View your prescription and confirm your order by clicking the approve prescription button: ${approvalLink}\n\n` +
+          `Prescription ID: ${prescriptionId}\n` +
+          `View your prescription: ${approvalLink}\n\n` +
           `Medications:\n${
             prescriptionData.products.map(p => 
               `- ${p.name} (${p.quantity} × ${p.price} PKR)`
@@ -360,11 +375,12 @@
 
       // Copy All Details Button
       document.getElementById('copyAllDetails').addEventListener('click', function() {
-        const text = `MERIMUSKAN E-PRESCRIPTION\n\n` +
+        const text = `MERIMUSKAN E-PRESCRIPTION SUMMARY\n\n` +
+          `Prescription ID: ${prescriptionId}\n` +
           `Patient: ${prescriptionData.patientName}\n` +
           `Email: ${prescriptionData.patientEmail}\n` +
           `Phone: ${prescriptionData.patientPhone}\n\n` +
-          `PRESCRIPTION LINK:\n${approvalLink}\n\n` +
+          `APPROVAL LINK:\n${approvalLink}\n\n` +
           `PRESCRIPTION DETAILS:\n${
             prescriptionData.products.map(p => 
               `- ${p.name} (${p.quantity} × ${p.price} PKR)`
