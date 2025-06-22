@@ -210,7 +210,7 @@
       </div>
       <div id="opgDiscountContent" style="display: none;">
         <p>We've included a discount coupon for your OPG X-Ray service. This advanced imaging provides a complete view of your upper and lower jaws, teeth, and surrounding structures.</p>
-        <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount" alt="OPG Discount Coupon" class="opg-discount-img">
+        <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png" alt="OPG Discount Coupon" class="opg-discount-img">
         <p>Present this coupon at our imaging center to receive your discount.</p>
       </div>
     </div>
@@ -250,15 +250,16 @@
 
       // Generate short URL with just ID and timestamp
       const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
-      const approvalLink = `${window.location.href.replace(
-        'doctorsprescriptionsummary.html', 
-        ''
-      )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}&dt=${Date.now()}`;
+      const baseUrl = window.location.href.split('/').slice(0, -1).join('/') + '/';
+      const approvalLink = `${baseUrl}doctorsprescriptionconfirmation.html?rx=${prescriptionId}&dt=${Date.now()}`;
 
-      // Store full data in localStorage
+      // Store full data in localStorage with proper expiration
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7);
+      
       localStorage.setItem(`rx-${prescriptionId}`, JSON.stringify({
         ...prescriptionData,
-        expires: Date.now() + 7*24*60*60*1000
+        expires: expirationDate.getTime()
       }));
 
       document.getElementById('approvalLink').textContent = approvalLink;
@@ -279,6 +280,11 @@
       
       opgCheckbox.addEventListener('change', function() {
         opgDiscountContent.style.display = this.checked ? 'block' : 'none';
+        if (this.checked) {
+          // Ensure the image is loaded properly
+          const opgImage = opgDiscountContent.querySelector('img');
+          opgImage.src = "https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png";
+        }
       });
 
       // Populate prescription details
@@ -355,7 +361,7 @@
               <p>Your doctor has recommended an OPG X-Ray (Panoramic Dental Imaging). This advanced imaging provides a complete view of your upper and lower jaws, teeth, and surrounding structures.</p>
               
               <p style="margin: 15px 0;"><strong>Special Discount Offer:</strong></p>
-              <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount" alt="OPG Discount Coupon" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+              <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png" alt="OPG Discount Coupon" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
               
               <p>Present this coupon at our imaging center to receive your discount. Our state-of-the-art imaging facility is located at [Your Imaging Center Address].</p>
             </div>
@@ -381,7 +387,7 @@
           + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
           + (opgChecked ? 
             `OPG X-Ray Recommended:\n` +
-            `Your doctor has recommended an OPG X-Ray. Please find the discount coupon attached.\n\n` : '')
+            `Your doctor has recommended an OPG X-Ray. Please find the discount coupon at this link: https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png\n\n` : '')
           + `Best regards,\n`
           + `${prescriptionData.doctorName}\n`
           + `Merimuskan Pharmacy`;
@@ -423,7 +429,7 @@
           }\n\n`
           + `TOTAL: ${prescriptionData.total} PKR\n\n`
           + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
-          + (opgChecked ? `OPG X-RAY RECOMMENDED: Yes\n\n` : '')
+          + (opgChecked ? `OPG X-RAY RECOMMENDED: Yes\nDiscount Coupon: https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount.png\n\n` : '')
           + `Prescribed by: ${prescriptionData.doctorName}\n`
           + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
         
