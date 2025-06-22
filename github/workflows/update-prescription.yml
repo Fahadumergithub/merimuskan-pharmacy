@@ -1,0 +1,40 @@
+name: Save Prescription
+
+on:
+  workflow_dispatch:
+    inputs:
+      rxId:
+        description: 'Prescription ID'
+        required: true
+      data:
+        description: 'Prescription JSON'
+        required: true
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Fetch and Update prescriptions.json
+        run: |
+          rxid="${{ github.event.inputs.rxId }}"
+          json_data='${{ github.event.inputs.data }}'
+
+          echo "Fetching latest file..."
+          curl -s https://raw.githubusercontent.com/${{ github.repository }}/main/prescriptions.json -o prescriptions.json
+
+          echo "Updating file..."
+          jq --arg key "$rxid" --argjson value "$json_data" '. + {($key): $value}' prescriptions.json > updated.json
+          mv updated.json prescriptions.json
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add prescriptions.json
+          git commit -m "Added prescription: ${{ github.event.inputs.rxId }}"
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
