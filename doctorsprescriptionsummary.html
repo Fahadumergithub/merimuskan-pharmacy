@@ -151,6 +151,30 @@
       font-style: italic;
       margin-top: 5px;
     }
+    .opg-section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #fff8e6;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+    }
+    .opg-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .opg-checkbox input {
+      width: 18px;
+      height: 18px;
+    }
+    .opg-discount-img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -178,6 +202,19 @@
       </div>
     </div>
 
+    <div class="opg-section">
+      <h3>Additional Services</h3>
+      <div class="opg-checkbox">
+        <input type="checkbox" id="opgCheckbox">
+        <label for="opgCheckbox">Prescribe OPG X-Ray (Panoramic Dental Imaging)</label>
+      </div>
+      <div id="opgDiscountContent" style="display: none;">
+        <p>We've included a discount coupon for your OPG X-Ray service. This advanced imaging provides a complete view of your upper and lower jaws, teeth, and surrounding structures.</p>
+        <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount" alt="OPG Discount Coupon" class="opg-discount-img">
+        <p>Present this coupon at our imaging center to receive your discount.</p>
+      </div>
+    </div>
+
     <div class="approval-link">
       <h3>Patient Approval Link</h3>
       <p>Share this link with your patient to approve the prescription:</p>
@@ -198,7 +235,7 @@
 
     <div class="action-buttons">
       <a href="doctorsprescriptionportal.html" class="back-button">Back to Edit</a>
-      <button id="sendEmail" class="send-button">Send via Gmail</button>
+      <button id="sendEmail" class="send-button">Send via Email</button>
     </div>
   </div>
 
@@ -230,7 +267,19 @@
       const qr = qrcode(0, 'L');
       qr.addData(approvalLink);
       qr.make();
-      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
+      const qrCodeImg = qr.createImgTag(4);
+      document.getElementById('qrCode').innerHTML = qrCodeImg;
+
+      // Get just the QR code image URL
+      const qrCodeSrc = qrCodeImg.match(/src="([^"]*)"/)[1];
+
+      // OPG Checkbox functionality
+      const opgCheckbox = document.getElementById('opgCheckbox');
+      const opgDiscountContent = document.getElementById('opgDiscountContent');
+      
+      opgCheckbox.addEventListener('change', function() {
+        opgDiscountContent.style.display = this.checked ? 'block' : 'none';
+      });
 
       // Populate prescription details
       document.getElementById('prescriptionDetails').innerHTML = `
@@ -261,11 +310,67 @@
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // 1. GMAIL INTEGRATION - WORKING BUTTON
+      // Email Integration
       document.getElementById('sendEmail').addEventListener('click', function() {
+        const opgChecked = opgCheckbox.checked;
         const subject = `Your Prescription from ${prescriptionData.doctorName}`;
-        let body = `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review your prescription. To confirm your order in the link below click the approve prescrption button :\n`
+        
+        // Create HTML email body
+        let body = `
+          <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <p>Dear ${prescriptionData.patientName},</p>
+            
+            <p>Please review your prescription from ${prescriptionData.doctorName}. To confirm your order, click the button below:</p>
+            
+            <p style="margin: 20px 0;">
+              <a href="${approvalLink}" style="background-color: #4299e1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Approve Prescription
+              </a>
+            </p>
+            
+            <p>Or use this link if the button doesn't work:<br>
+            <a href="${approvalLink}">${approvalLink}</a></p>
+            
+            <h3 style="margin-top: 25px;">Prescription Details:</h3>
+            <ul style="padding-left: 20px;">
+              ${prescriptionData.products.map(p => 
+                `<li>${p.name} (${p.quantity} × ${p.price} PKR)</li>`
+              ).join('')}
+            </ul>
+            
+            <p><strong>Total: ${prescriptionData.total} PKR</strong></p>
+            
+            <p><strong>Doctor's Notes:</strong><br>
+            ${prescriptionData.prescriptionNotes}</p>
+            
+            <div style="text-align: center; margin: 25px 0;">
+              <h3>Scan to Approve</h3>
+              <img src="${qrCodeSrc}" alt="QR Code" style="max-width: 150px;">
+            </div>
+            
+            ${opgChecked ? `
+            <div style="background-color: #fff8e6; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+              <h3 style="margin-top: 0;">OPG X-Ray Service</h3>
+              <p>Your doctor has recommended an OPG X-Ray (Panoramic Dental Imaging). This advanced imaging provides a complete view of your upper and lower jaws, teeth, and surrounding structures.</p>
+              
+              <p style="margin: 15px 0;"><strong>Special Discount Offer:</strong></p>
+              <img src="https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/OpgDiscount" alt="OPG Discount Coupon" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+              
+              <p>Present this coupon at our imaging center to receive your discount. Our state-of-the-art imaging facility is located at [Your Imaging Center Address].</p>
+            </div>
+            ` : ''}
+            
+            <p>Best regards,<br>
+            ${prescriptionData.doctorName}<br>
+            Merimuskan Pharmacy</p>
+          </body>
+          </html>
+        `;
+
+        // Create plain text fallback
+        let plainTextBody = `Dear ${prescriptionData.patientName},\n\n`
+          + `Please review your prescription from ${prescriptionData.doctorName}. To confirm your order, click the link below:\n`
           + `${approvalLink}\n\n`
           + `Medications:\n${
             prescriptionData.products.map(p => 
@@ -274,25 +379,18 @@
           }\n\n`
           + `Total: ${prescriptionData.total} PKR\n\n`
           + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
+          + (opgChecked ? 
+            `OPG X-Ray Recommended:\n` +
+            `Your doctor has recommended an OPG X-Ray. Please find the discount coupon attached.\n\n` : '')
           + `Best regards,\n`
           + `${prescriptionData.doctorName}\n`
           + `Merimuskan Pharmacy`;
 
-        // Truncate if too long for URL
-        if (body.length > 1500) {
-          body = `Dear ${prescriptionData.patientName},\n\n`
-            + `Please review your prescription:\n`
-            + `${approvalLink}\n\n`
-            + `[Full details available at the link above]\n\n`
-            + `Best regards,\n`
-            + `${prescriptionData.doctorName}`;
-        }
-
-        // Gmail compose URL
+        // Gmail compose URL with HTML body
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
           `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
           `&su=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(body)}` +
+          `&body=${encodeURIComponent(plainTextBody)}` +
           `&bcc=merimuskanconnect@gmail.com`;
 
         // Try to open Gmail in new tab
@@ -304,14 +402,15 @@
             window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
               encodeURIComponent(subject)
             }&body=${
-              encodeURIComponent(body)
+              encodeURIComponent(plainTextBody)
             }&bcc=merimuskanconnect@gmail.com`;
           }
         }, 500);
       });
 
-      // 2. Copy All Details Button
+      // Copy All Details Button
       document.getElementById('copyAllDetails').addEventListener('click', function() {
+        const opgChecked = opgCheckbox.checked;
         const text = `PATIENT PRESCRIPTION\n\n`
           + `Patient: ${prescriptionData.patientName}\n`
           + `Email: ${prescriptionData.patientEmail}\n`
@@ -324,6 +423,7 @@
           }\n\n`
           + `TOTAL: ${prescriptionData.total} PKR\n\n`
           + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
+          + (opgChecked ? `OPG X-RAY RECOMMENDED: Yes\n\n` : '')
           + `Prescribed by: ${prescriptionData.doctorName}\n`
           + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
         
