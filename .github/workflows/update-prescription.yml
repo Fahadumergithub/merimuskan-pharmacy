@@ -10,6 +10,9 @@ on:
         description: 'Prescription JSON'
         required: true
 
+permissions:
+  contents: write
+
 jobs:
   update-prescription:
     runs-on: ubuntu-latest
@@ -17,16 +20,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Get full history to avoid issues
+          fetch-depth: 0
 
-      - name: Setup jq
-        uses: extractions/setup-jq@v1
-        with:
-          version: '1.6'
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Update prescriptions.json
         run: |
-          # Check if file exists, if not create empty JSON
+          # Create file if it doesn't exist
           if [ ! -f "prescriptions.json" ]; then
             echo "{}" > prescriptions.json
           fi
@@ -36,19 +37,18 @@ jobs:
              --argjson value "${{ github.event.inputs.data }}" \
              '.[$key] = $value' prescriptions.json > temp.json && mv temp.json prescriptions.json
 
-          # Validate the updated file
+          # Validate JSON
           jq empty prescriptions.json
 
       - name: Commit and push changes
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           git add prescriptions.json
           
-          # Only commit if there are changes
           if git diff-index --quiet HEAD --; then
             echo "No changes to commit"
           else
