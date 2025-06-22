@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Approve Your e-Prescription - Merimuskan</title>
+  <title>Approve Your Prescription - Merimuskan</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -96,7 +96,6 @@
       display: flex;
       justify-content: space-between;
       margin-top: 32px;
-      gap: 15px;
     }
     .reject-button, .approve-button {
       padding: 12px 24px;
@@ -105,20 +104,18 @@
       cursor: pointer;
       text-decoration: none;
       font-size: 16px;
-      border: none;
-      flex: 1;
-      text-align: center;
     }
     .reject-button {
       background: #f0f0f0;
       color: #333;
+      border: none;
     }
     .approve-button {
       background: #4299e1;
       color: white;
+      border: none;
       display: flex;
       align-items: center;
-      justify-content: center;
     }
     .approve-button:hover {
       background: #3182ce;
@@ -151,44 +148,18 @@
     #confirmation-content {
       display: none;
     }
-    .expiry-notice {
-      font-size: 14px;
-      color: #666;
-      margin-top: 10px;
-      font-style: italic;
-      text-align: center;
-    }
-    .prescription-id {
-      font-weight: 600;
-      color: #2C3345;
-      margin: 10px 0;
-      text-align: center;
-    }
   </style>
-  <script>
-    // Handle clean URLs on page load
-    (function() {
-      const pathParts = window.location.pathname.split('/');
-      const maybeRxId = pathParts[pathParts.length - 1];
-      
-      if (maybeRxId.startsWith('RX-')) {
-        // Redirect to parameterized version
-        window.location.href = `doctorsprescriptionconfirmation.html?rx=${maybeRxId}`;
-      }
-    })();
-  </script>
 </head>
 <body>
   <div id="loadingState" class="loading-state">
-    <p>Loading your e-Prescription...</p>
+    <p>Loading your prescription...</p>
   </div>
 
   <div id="confirmation-content" class="confirmation-container">
     <div class="confirmation-header">
       <div class="icon">℞</div>
-      <h1>Review Your e-Prescription</h1>
+      <h1>Review Your Prescription</h1>
       <p>Please verify your prescription details before approval</p>
-      <div class="prescription-id">Prescription ID: <span id="rxIdDisplay"></span></div>
     </div>
 
     <div class="order-summary">
@@ -223,7 +194,6 @@
         Approve Prescription
       </button>
     </div>
-    <p class="expiry-notice">This prescription link expires in 7 days</p>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
@@ -234,22 +204,20 @@
       // Show loading state initially
       document.getElementById('loadingState').style.display = 'block';
       
-      // Get prescription ID from URL
+      // Get data from URL
       const urlParams = new URLSearchParams(window.location.search);
       const prescriptionId = urlParams.get('rx');
       
-      if (!prescriptionId || !prescriptionId.startsWith('RX-')) {
-        window.location.href = 'prescription-not-found.html';
+      if (!prescriptionId) {
+        alert('Invalid prescription link');
+        window.location.href = 'index.html';
         return;
       }
-
-      // Display prescription ID
-      document.getElementById('rxIdDisplay').textContent = prescriptionId;
 
       // Retrieve from localStorage
       const storedData = localStorage.getItem(`rx-${prescriptionId}`);
       if (!storedData) {
-        alert('e-Prescription not found. Please ask your doctor to resend.');
+        alert('Prescription not found. Please ask your doctor to resend.');
         window.location.href = 'index.html';
         return;
       }
@@ -259,7 +227,7 @@
       // Check expiration
       if (Date.now() > prescriptionData.expires) {
         localStorage.removeItem(`rx-${prescriptionId}`);
-        alert('e-Prescription link has expired');
+        alert('Prescription link has expired');
         window.location.href = 'index.html';
         return;
       }
@@ -281,11 +249,6 @@
       // Populate prescription notes
       document.getElementById('prescriptionNotes').textContent = 
         prescriptionData.prescriptionNotes || "No special instructions provided";
-
-      // Hide notes container if no notes
-      if (!prescriptionData.prescriptionNotes) {
-        document.getElementById('prescriptionNotesContainer').style.display = 'none';
-      }
 
       // Populate order items
       const orderItems = document.getElementById('orderItems');
@@ -322,7 +285,7 @@
           total: orderData.total,
           status: "Approved",
           doctor: orderData.doctorName,
-          type: "e-Prescription"
+          type: "Prescription"
         };
 
         try {
@@ -350,7 +313,7 @@
             `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
           ).join('\n');
 
-          const orderSummary = `e-Prescription ID: ${prescriptionId}
+          const orderSummary = `Prescription ID: ${prescriptionId}
 Approval Date: ${now.toLocaleDateString()}
 
 DOCTOR:
@@ -363,7 +326,7 @@ Email: ${prescriptionData.patientEmail}
 Address: ${prescriptionData.patientAddress}
 
 PRESCRIPTION NOTES:
-${prescriptionData.prescriptionNotes || "None provided"}
+${prescriptionData.prescriptionNotes}
 
 MEDICATIONS:
 ${productsText}
@@ -377,8 +340,7 @@ TOTAL: ${prescriptionData.total} PKR`;
             order_summary: orderSummary,
             total: prescriptionData.total,
             phone: prescriptionData.patientPhone,
-            email: prescriptionData.patientEmail,
-            prescription_type: "e-Prescription"
+            email: prescriptionData.patientEmail
           });
 
           await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
@@ -389,8 +351,7 @@ TOTAL: ${prescriptionData.total} PKR`;
             order_summary: orderSummary,
             order_total: prescriptionData.total,
             order_timestamp: now.toLocaleString(),
-            doctor_name: prescriptionData.doctorName,
-            prescription_type: "e-Prescription"
+            doctor_name: prescriptionData.doctorName
           });
 
           await sendToGoogleSheet(prescriptionData, prescriptionId);
@@ -401,7 +362,7 @@ TOTAL: ${prescriptionData.total} PKR`;
           window.location.href = 'thankyou.html';
         } catch (error) {
           console.error("Error:", error);
-          alert("e-Prescription approved! If email doesn't arrive, please call the pharmacy.");
+          alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
           window.location.href = 'thankyou.html';
         } finally {
           button.disabled = false;
@@ -411,7 +372,7 @@ TOTAL: ${prescriptionData.total} PKR`;
 
       // Reject button handler
       document.getElementById('rejectPrescription').addEventListener('click', function() {
-        if (confirm("Request changes to this e-Prescription? The doctor will be notified.")) {
+        if (confirm("Request changes to this prescription? The doctor will be notified.")) {
           // In a full implementation, we would send an email to the doctor here
           alert("Your request has been noted. The doctor will contact you shortly.");
           window.location.href = 'index.html';
