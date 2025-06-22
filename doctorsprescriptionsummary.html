@@ -265,7 +265,7 @@
       document.getElementById('sendEmail').addEventListener('click', function() {
         const subject = `Your Prescription from ${prescriptionData.doctorName}`;
         let body = `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review your prescription:\n`
+          + `Please review your prescription. To confirm your order in the link below click the approve prescrption button :\n`
           + `${approvalLink}\n\n`
           + `Medications:\n${
             prescriptionData.products.map(p => 
