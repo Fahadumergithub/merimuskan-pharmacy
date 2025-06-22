@@ -1,21 +1,21 @@
-name: Update Prescription
+name: Save Prescription
 
 on:
   workflow_dispatch:
     inputs:
       rxId:
-        description: 'Prescription ID'
+        description: 'Prescription ID (e.g., RX-12345)'
         required: true
       data:
-        description: 'Prescription JSON'
+        description: 'Prescription Data (as string)'
         required: true
-        default: '{}'  # Default empty JSON if none provided
+        default: '{}'
 
 permissions:
   contents: write
 
 jobs:
-  update-prescription:
+  save-prescription:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,43 +23,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Validate and update prescriptions.json
+      - name: Setup environment
         run: |
-          # Create file if it doesn't exist
+          # Create empty file if it doesn't exist
           if [ ! -f "prescriptions.json" ]; then
             echo "{}" > prescriptions.json
           fi
 
-          # Validate input JSON
-          echo "Validating input JSON..."
-          echo "${{ github.event.inputs.data }}" | jq empty
-          
-          # Update the JSON file
-          echo "Updating prescriptions.json..."
-          jq --arg key "${{ github.event.inputs.rxId }}" \
-             --argjson value "$(echo '${{ github.event.inputs.data }}' | jq .)" \
-             '.[$key] = $value' prescriptions.json > temp.json && mv temp.json prescriptions.json
+          # Store inputs in variables
+          echo "RX_ID=${{ github.event.inputs.rxId }}" >> $GITHUB_ENV
+          echo "RX_DATA='${{ github.event.inputs.data }}'" >> $GITHUB_ENV
 
-          # Show updated content for verification
-          echo "Updated content:"
-          cat prescriptions.json
+      - name: Process and save prescription
+        run: |
+          # Convert string to valid JSON if needed
+          if ! echo "$RX_DATA" | jq empty 2>/dev/null; then
+            RX_DATA=$(echo "$RX_DATA" | jq -R .)
+          fi
 
-      - name: Commit and push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Update prescriptions.json
+          jq --arg id "$RX_ID" \
+             --argjson data "$(echo "$RX_DATA" | jq .)" \
+             '.[$id] = $data' prescriptions.json > temp.json && mv temp.json prescriptions.json
+
+          # Verify update
+          echo "Current prescriptions:"
+          jq . prescriptions.json
+
+      - name: Commit changes
+        if: success()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           git add prescriptions.json
-          
           if git diff-index --quiet HEAD --; then
             echo "No changes to commit"
           else
-            git commit -m "Updated prescription: ${{ github.event.inputs.rxId }}"
+            git commit -m "Added prescription: $RX_ID"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
