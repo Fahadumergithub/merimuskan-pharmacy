@@ -9,6 +9,7 @@ on:
       data:
         description: 'Prescription JSON'
         required: true
+        default: '{}'  # Default empty JSON if none provided
 
 permissions:
   contents: write
@@ -25,20 +26,26 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Update prescriptions.json
+      - name: Validate and update prescriptions.json
         run: |
           # Create file if it doesn't exist
           if [ ! -f "prescriptions.json" ]; then
             echo "{}" > prescriptions.json
           fi
 
+          # Validate input JSON
+          echo "Validating input JSON..."
+          echo "${{ github.event.inputs.data }}" | jq empty
+          
           # Update the JSON file
+          echo "Updating prescriptions.json..."
           jq --arg key "${{ github.event.inputs.rxId }}" \
-             --argjson value "${{ github.event.inputs.data }}" \
+             --argjson value "$(echo '${{ github.event.inputs.data }}' | jq .)" \
              '.[$key] = $value' prescriptions.json > temp.json && mv temp.json prescriptions.json
 
-          # Validate JSON
-          jq empty prescriptions.json
+          # Show updated content for verification
+          echo "Updated content:"
+          cat prescriptions.json
 
       - name: Commit and push changes
         env:
