@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,25 +158,22 @@
       font-style: italic;
       text-align: center;
     }
-    .url-info {
-      font-size: 14px;
-      color: #666;
-      margin-top: 5px;
+    .prescription-id {
+      font-weight: 600;
+      color: #2C3345;
+      margin: 10px 0;
       text-align: center;
     }
   </style>
   <script>
-    // CLIENT-SIDE ROUTING - RUNS IMMEDIATELY
+    // Handle clean URLs on page load
     (function() {
-      // Check if this is a clean URL format: /e-prescription/name/RX-1234
       const pathParts = window.location.pathname.split('/');
       const maybeRxId = pathParts[pathParts.length - 1];
       
       if (maybeRxId.startsWith('RX-')) {
-        // Transform clean URL to work with existing code
-        const newUrl = new URL(window.location);
-        newUrl.search = `?rx=${maybeRxId}`;
-        history.replaceState({}, '', newUrl);
+        // Redirect to parameterized version
+        window.location.href = `doctorsprescriptionconfirmation.html?rx=${maybeRxId}`;
       }
     })();
   </script>
@@ -192,7 +188,7 @@
       <div class="icon">℞</div>
       <h1>Review Your e-Prescription</h1>
       <p>Please verify your prescription details before approval</p>
-      <p class="url-info">My Merimuskan e-Prescription</p>
+      <div class="prescription-id">Prescription ID: <span id="rxIdDisplay"></span></div>
     </div>
 
     <div class="order-summary">
@@ -238,7 +234,7 @@
       // Show loading state initially
       document.getElementById('loadingState').style.display = 'block';
       
-      // Get prescription ID from URL (works with both formats)
+      // Get prescription ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const prescriptionId = urlParams.get('rx');
       
@@ -246,6 +242,9 @@
         window.location.href = 'prescription-not-found.html';
         return;
       }
+
+      // Display prescription ID
+      document.getElementById('rxIdDisplay').textContent = prescriptionId;
 
       // Retrieve from localStorage
       const storedData = localStorage.getItem(`rx-${prescriptionId}`);
