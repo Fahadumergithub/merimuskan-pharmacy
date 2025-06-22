@@ -151,6 +151,10 @@
       font-style: italic;
       margin-top: 5px;
     }
+    .friendly-url {
+      color: #4299e1;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -183,7 +187,7 @@
       <p>Share this link with your patient to approve the prescription:</p>
       <div class="link-box" id="approvalLink">Generating link...</div>
       <p class="expiry-notice">This link will expire in 7 days</p>
-      <p class="url-warning">Note: Long URLs are safe - they contain your prescription data</p>
+      <p class="url-warning">Note: My Merimuskan e-Prescription links are secure and contain your prescription data</p>
       
       <div class="button-group">
         <button onclick="copyToClipboard()" class="copy-button">Copy Link</button>
@@ -198,7 +202,7 @@
 
     <div class="action-buttons">
       <a href="doctorsprescriptionportal.html" class="back-button">Back to Edit</a>
-      <button id="sendEmail" class="send-button">Send via Gmail</button>
+      <button id="sendEmail" class="send-button">Send via Email</button>
     </div>
   </div>
 
@@ -211,20 +215,27 @@
         return;
       }
 
-      // Generate short URL with just ID and timestamp
+      // Generate friendly URL
       const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
-      const approvalLink = `${window.location.href.replace(
+      const patientNameSlug = prescriptionData.patientName.replace(/\s+/g, '-').toLowerCase();
+      const approvalLink = `${window.location.origin}${window.location.pathname.replace(
         'doctorsprescriptionsummary.html', 
         ''
-      )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}&dt=${Date.now()}`;
+      )}e-prescription/${patientNameSlug}/${prescriptionId}`;
 
-      // Store full data in localStorage
+      // Store data as before
       localStorage.setItem(`rx-${prescriptionId}`, JSON.stringify({
         ...prescriptionData,
         expires: Date.now() + 7*24*60*60*1000
       }));
 
-      document.getElementById('approvalLink').textContent = approvalLink;
+      // Update the display
+      document.getElementById('approvalLink').innerHTML = `
+        <div class="friendly-url">${approvalLink}</div>
+        <div style="font-size:14px;color:#666;margin-top:5px;">
+          My Merimuskan e-Prescription
+        </div>
+      `;
 
       // Generate QR Code
       const qr = qrcode(0, 'L');
@@ -261,38 +272,75 @@
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // 1. GMAIL INTEGRATION - WORKING BUTTON
+      // Email integration
       document.getElementById('sendEmail').addEventListener('click', function() {
-        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
-        let body = `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review your prescription and place an order by clicking the approve prescription button in the attached link below :\n`
-          + `${approvalLink}\n\n`
-          + `Medications:\n${
+        const subject = `Your e-Prescription from ${prescriptionData.doctorName} - Merimuskan Pharmacy`;
+        
+        // Get QR code as data URL
+        const qrCodeImg = document.querySelector('#qrCode img');
+        const qrCodeDataUrl = qrCodeImg.src;
+        
+        // HTML email body
+        const htmlBody = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px;">
+            <h2 style="color: #2C3345;">Dear ${prescriptionData.patientName},</h2>
+            <p>You've received a new e-Prescription from Dr. ${prescriptionData.doctorName}:</p>
+            
+            <div style="text-align: center; margin: 20px 0;">
+              <a href="${approvalLink}" style="
+                background-color: #4299e1;
+                color: white;
+                padding: 12px 24px;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: bold;
+                display: inline-block;
+              ">View My e-Prescription</a>
+            </div>
+            
+            <p>Or scan this QR code with your phone's camera:</p>
+            <div style="text-align: center;">
+              <img src="${qrCodeDataUrl}" alt="e-Prescription QR Code" style="width: 150px; height: 150px;">
+            </div>
+            
+            <h3 style="color: #2C3345;">Medications:</h3>
+            <ul>
+              ${prescriptionData.products.map(p => 
+                `<li>${p.name} (${p.quantity} × ${p.price} PKR)</li>`
+              ).join('')}
+            </ul>
+            
+            <p><strong>Total: ${prescriptionData.total} PKR</strong></p>
+            
+            <h3 style="color: #2C3345;">Doctor's Notes:</h3>
+            <p>${prescriptionData.prescriptionNotes}</p>
+            
+            <p>Best regards,<br>
+            ${prescriptionData.doctorName}<br>
+            Merimuskan Pharmacy</p>
+          </div>
+        `;
+
+        // Plain text fallback
+        const textBody = `Dear ${prescriptionData.patientName},\n\n` +
+          `You've received a new e-Prescription from Dr. ${prescriptionData.doctorName} at Merimuskan Pharmacy.\n\n` +
+          `View your prescription and confirm your order by clicking the approve prescription button: ${approvalLink}\n\n` +
+          `Medications:\n${
             prescriptionData.products.map(p => 
               `- ${p.name} (${p.quantity} × ${p.price} PKR)`
             ).join('\n')
-          }\n\n`
-          + `Total: ${prescriptionData.total} PKR\n\n`
-          + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
-          + `Best regards,\n`
-          + `${prescriptionData.doctorName}\n`
-          + `Merimuskan Pharmacy`;
-
-        // Truncate if too long for URL
-        if (body.length > 1500) {
-          body = `Dear ${prescriptionData.patientName},\n\n`
-            + `Please review your prescription:\n`
-            + `${approvalLink}\n\n`
-            + `[Full details available at the link above]\n\n`
-            + `Best regards,\n`
-            + `${prescriptionData.doctorName}`;
-        }
+          }\n\n` +
+          `Total: ${prescriptionData.total} PKR\n\n` +
+          `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n` +
+          `Best regards,\n` +
+          `${prescriptionData.doctorName}\n` +
+          `Merimuskan Pharmacy`;
 
         // Gmail compose URL
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
           `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
           `&su=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(body)}` +
+          `&body=${encodeURIComponent(textBody)}` +
           `&bcc=merimuskanconnect@gmail.com`;
 
         // Try to open Gmail in new tab
@@ -304,28 +352,28 @@
             window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
               encodeURIComponent(subject)
             }&body=${
-              encodeURIComponent(body)
+              encodeURIComponent(textBody)
             }&bcc=merimuskanconnect@gmail.com`;
           }
         }, 500);
       });
 
-      // 2. Copy All Details Button
+      // Copy All Details Button
       document.getElementById('copyAllDetails').addEventListener('click', function() {
-        const text = `PATIENT PRESCRIPTION\n\n`
-          + `Patient: ${prescriptionData.patientName}\n`
-          + `Email: ${prescriptionData.patientEmail}\n`
-          + `Phone: ${prescriptionData.patientPhone}\n\n`
-          + `APPROVAL LINK:\n${approvalLink}\n\n`
-          + `PRESCRIPTION DETAILS:\n${
+        const text = `MERIMUSKAN E-PRESCRIPTION\n\n` +
+          `Patient: ${prescriptionData.patientName}\n` +
+          `Email: ${prescriptionData.patientEmail}\n` +
+          `Phone: ${prescriptionData.patientPhone}\n\n` +
+          `PRESCRIPTION LINK:\n${approvalLink}\n\n` +
+          `PRESCRIPTION DETAILS:\n${
             prescriptionData.products.map(p => 
               `- ${p.name} (${p.quantity} × ${p.price} PKR)`
             ).join('\n')
-          }\n\n`
-          + `TOTAL: ${prescriptionData.total} PKR\n\n`
-          + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
-          + `Prescribed by: ${prescriptionData.doctorName}\n`
-          + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
+          }\n\n` +
+          `TOTAL: ${prescriptionData.total} PKR\n\n` +
+          `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n` +
+          `Prescribed by: ${prescriptionData.doctorName}\n` +
+          `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
         
         navigator.clipboard.writeText(text)
           .then(() => alert('All prescription details copied to clipboard!'))
@@ -334,7 +382,7 @@
     });
 
     function copyToClipboard() {
-      const linkText = document.getElementById('approvalLink').textContent;
+      const linkText = document.querySelector('#approvalLink .friendly-url').textContent;
       navigator.clipboard.writeText(linkText).then(() => {
         alert('Link copied to clipboard!');
       }).catch(err => {
