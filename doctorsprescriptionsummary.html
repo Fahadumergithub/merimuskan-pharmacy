@@ -220,7 +220,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script>
-    // Google Apps Script endpoint - use your exact URL
     const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbydcwMR_gCvg1GrFF0OplPCfk8BCHyGGcTzwBPGfte9KxJbhyN8CskRvtypsD9tF71ajQ/exec";
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -233,7 +232,7 @@
       // Generate prescription ID
       const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
       
-      // Create local approval link (original version)
+      // Create local approval link
       const localApprovalLink = `${window.location.href.replace(
         'doctorsprescriptionsummary.html', 
         ''
@@ -250,14 +249,14 @@
       qr.make();
       document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
 
-      // Populate prescription details (your original code)
+      // Populate prescription details
       document.getElementById('prescriptionDetails').innerHTML = `
         <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
         <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
         <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
       `;
 
-      // Populate patient details (your original code)
+      // Populate patient details
       document.getElementById('patientDetails').innerHTML = `
         <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
         <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
@@ -265,7 +264,7 @@
         <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
       `;
 
-      // Populate prescription items (your original code)
+      // Populate prescription items
       const prescriptionItems = document.getElementById('prescriptionItems');
       prescriptionData.products.forEach(product => {
         const itemTotal = (product.price * product.quantity).toFixed(2);
@@ -279,7 +278,7 @@
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // 1. GMAIL INTEGRATION - EXACTLY YOUR ORIGINAL CODE
+      // GMAIL INTEGRATION
       document.getElementById('sendEmail').addEventListener('click', function() {
         const subject = `Your Prescription from ${prescriptionData.doctorName}`;
         let body = `Dear ${prescriptionData.patientName},\n\n`
@@ -296,7 +295,6 @@
           + `${prescriptionData.doctorName}\n`
           + `Merimuskan Pharmacy`;
 
-        // Truncate if too long for URL (your original code)
         if (body.length > 1500) {
           body = `Dear ${prescriptionData.patientName},\n\n`
             + `Please review your prescription:\n`
@@ -306,17 +304,14 @@
             + `${prescriptionData.doctorName}`;
         }
 
-        // Gmail compose URL (your original code)
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
           `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
           `&su=${encodeURIComponent(subject)}` +
           `&body=${encodeURIComponent(body)}` +
           `&bcc=merimuskanconnect@gmail.com`;
 
-        // Try to open Gmail in new tab (your original code)
         const newWindow = window.open(gmailUrl, '_blank');
         
-        // Fallback to regular mailto if blocked (your original code)
         setTimeout(() => {
           if (!newWindow || newWindow.closed) {
             window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
@@ -328,7 +323,7 @@
         }, 500);
       });
 
-      // 2. Copy All Details Button (your original code)
+      // Copy All Details Button
       document.getElementById('copyAllDetails').addEventListener('click', function() {
         const text = `PATIENT PRESCRIPTION\n\n`
           + `Patient: ${prescriptionData.patientName}\n`
@@ -350,8 +345,8 @@
           .catch(err => console.error('Copy failed:', err));
       });
 
-      // 3. Try to save to GitHub in the background
-      saveToGitHub(prescriptionId, prescriptionData);
+      // Enhanced saveToGitHub function with CORS handling
+      saveToGitHub(prescriptionId, prescriptionData, localApprovalLink);
     });
 
     function copyToClipboard() {
@@ -364,28 +359,53 @@
       });
     }
 
-    async function saveToGitHub(prescriptionId, prescriptionData) {
+    async function saveToGitHub(prescriptionId, prescriptionData, approvalLink) {
       try {
         console.log("Attempting to save to GitHub...");
-        const response = await fetch(GAS_ENDPOINT, {
+        
+        const payload = {
+          rxId: prescriptionId,
+          data: prescriptionData,
+          approvalLink: approvalLink,
+          timestamp: new Date().toISOString()
+        };
+
+        // Method 1: Standard POST with JSON
+        let response = await fetch(GAS_ENDPOINT, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            rxId: prescriptionId,
-            data: prescriptionData
-          })
+          body: JSON.stringify(payload)
         });
-        
-        const result = await response.json();
+
+        // If method 1 fails, try method 2: FormData
+        if (!response.ok) {
+          console.log("Standard POST failed, trying FormData approach...");
+          const formData = new FormData();
+          formData.append('data', JSON.stringify(payload));
+          
+          response = await fetch(GAS_ENDPOINT, {
+            method: 'POST',
+            body: formData
+          });
+        }
+
+        // If still failing, try method 3: GET with URL params
+        if (!response.ok) {
+          console.log("FormData POST failed, trying GET with URL params...");
+          const params = new URLSearchParams();
+          params.append('data', JSON.stringify(payload));
+          
+          response = await fetch(`${GAS_ENDPOINT}?${params.toString()}`, {
+            method: 'GET'
+          });
+        }
+
+        // Process response
+        const result = await response.text();
         console.log("GitHub save result:", result);
         
-        if (result.success) {
-          console.log("Successfully saved to GitHub");
-        } else {
-          console.error("Failed to save to GitHub:", result.error);
-        }
       } catch (error) {
         console.error("Error saving to GitHub:", error);
       }
