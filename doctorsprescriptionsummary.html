@@ -220,10 +220,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script>
-    // Google Apps Script endpoint - replace with your actual URL
+    // Google Apps Script endpoint - use your exact URL
     const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbydcwMR_gCvg1GrFF0OplPCfk8BCHyGGcTzwBPGfte9KxJbhyN8CskRvtypsD9tF71ajQ/exec";
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', function() {
       const prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
       if (!prescriptionData) {
         window.location.href = 'doctorsprescriptionportal.html';
@@ -233,11 +233,140 @@
       // Generate prescription ID
       const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
       
-      try {
-        // Populate the prescription details immediately (before saving)
-        populatePrescriptionDetails(prescriptionData);
+      // Create local approval link (original version)
+      const localApprovalLink = `${window.location.href.replace(
+        'doctorsprescriptionsummary.html', 
+        ''
+      )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
+
+      // Immediately show the local version while we try to save to GitHub
+      document.getElementById('linkText').textContent = localApprovalLink;
+      document.getElementById('linkText').style.display = 'block';
+      document.querySelector('.loading-spinner').style.display = 'none';
+
+      // Generate QR Code with local link
+      const qr = qrcode(0, 'L');
+      qr.addData(localApprovalLink);
+      qr.make();
+      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
+
+      // Populate prescription details (your original code)
+      document.getElementById('prescriptionDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
+        <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
+        <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
+      `;
+
+      // Populate patient details (your original code)
+      document.getElementById('patientDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
+        <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
+        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
+        <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
+      `;
+
+      // Populate prescription items (your original code)
+      const prescriptionItems = document.getElementById('prescriptionItems');
+      prescriptionData.products.forEach(product => {
+        const itemTotal = (product.price * product.quantity).toFixed(2);
+        prescriptionItems.innerHTML += `
+          <div class="product-item">
+            <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
+            <div>${itemTotal} PKR</div>
+          </div>
+        `;
+      });
+
+      document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
+
+      // 1. GMAIL INTEGRATION - EXACTLY YOUR ORIGINAL CODE
+      document.getElementById('sendEmail').addEventListener('click', function() {
+        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
+        let body = `Dear ${prescriptionData.patientName},\n\n`
+          + `Please review your prescription:\n`
+          + `${localApprovalLink}\n\n`
+          + `Medications:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `Total: ${prescriptionData.total} PKR\n\n`
+          + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
+          + `Best regards,\n`
+          + `${prescriptionData.doctorName}\n`
+          + `Merimuskan Pharmacy`;
+
+        // Truncate if too long for URL (your original code)
+        if (body.length > 1500) {
+          body = `Dear ${prescriptionData.patientName},\n\n`
+            + `Please review your prescription:\n`
+            + `${localApprovalLink}\n\n`
+            + `[Full details available at the link above]\n\n`
+            + `Best regards,\n`
+            + `${prescriptionData.doctorName}`;
+        }
+
+        // Gmail compose URL (your original code)
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
+          `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
+          `&su=${encodeURIComponent(subject)}` +
+          `&body=${encodeURIComponent(body)}` +
+          `&bcc=merimuskanconnect@gmail.com`;
+
+        // Try to open Gmail in new tab (your original code)
+        const newWindow = window.open(gmailUrl, '_blank');
         
-        // Save to GitHub via Google Apps Script
+        // Fallback to regular mailto if blocked (your original code)
+        setTimeout(() => {
+          if (!newWindow || newWindow.closed) {
+            window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
+              encodeURIComponent(subject)
+            }&body=${
+              encodeURIComponent(body)
+            }&bcc=merimuskanconnect@gmail.com`;
+          }
+        }, 500);
+      });
+
+      // 2. Copy All Details Button (your original code)
+      document.getElementById('copyAllDetails').addEventListener('click', function() {
+        const text = `PATIENT PRESCRIPTION\n\n`
+          + `Patient: ${prescriptionData.patientName}\n`
+          + `Email: ${prescriptionData.patientEmail}\n`
+          + `Phone: ${prescriptionData.patientPhone}\n\n`
+          + `APPROVAL LINK:\n${localApprovalLink}\n\n`
+          + `PRESCRIPTION DETAILS:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `TOTAL: ${prescriptionData.total} PKR\n\n`
+          + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
+          + `Prescribed by: ${prescriptionData.doctorName}\n`
+          + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
+        
+        navigator.clipboard.writeText(text)
+          .then(() => alert('All prescription details copied to clipboard!'))
+          .catch(err => console.error('Copy failed:', err));
+      });
+
+      // 3. Try to save to GitHub in the background
+      saveToGitHub(prescriptionId, prescriptionData);
+    });
+
+    function copyToClipboard() {
+      const linkText = document.getElementById('linkText').textContent;
+      navigator.clipboard.writeText(linkText).then(() => {
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy link. Please try again.');
+      });
+    }
+
+    async function saveToGitHub(prescriptionId, prescriptionData) {
+      try {
+        console.log("Attempting to save to GitHub...");
         const response = await fetch(GAS_ENDPOINT, {
           method: 'POST',
           headers: {
@@ -250,162 +379,16 @@
         });
         
         const result = await response.json();
+        console.log("GitHub save result:", result);
         
         if (result.success) {
-          // Success - update UI with the approval link
-          const approvalLink = result.approvalLink;
-          
-          // Show the link and hide spinner
-          document.getElementById('linkText').textContent = approvalLink;
-          document.getElementById('linkText').style.display = 'block';
-          document.querySelector('.loading-spinner').style.display = 'none';
-          
-          // Generate QR Code
-          const qr = qrcode(0, 'L');
-          qr.addData(approvalLink);
-          qr.make();
-          document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
-          
-          // Set up email button with the correct link
-          setupEmailButton(prescriptionData, approvalLink);
-          
-          // Set up copy all details button
-          setupCopyAllButton(prescriptionData, approvalLink);
-          
+          console.log("Successfully saved to GitHub");
         } else {
-          // Error handling
-          console.error('Failed to save prescription:', result.error);
-          document.getElementById('approvalLink').innerHTML = '<span style="color:red">Error generating link. Please try again.</span>';
-          alert('Failed to save prescription. Please try again or contact support.');
+          console.error("Failed to save to GitHub:", result.error);
         }
       } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('approvalLink').innerHTML = '<span style="color:red">Connection error. Please check your network.</span>';
-        alert('Network error occurred. Please check your connection and try again.');
+        console.error("Error saving to GitHub:", error);
       }
-    });
-
-    function populatePrescriptionDetails(prescriptionData) {
-      // Populate prescription details
-      document.getElementById('prescriptionDetails').innerHTML = `
-        <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName || 'Not specified'}</div></div>
-        <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate || Date.now()).toLocaleDateString()}</div></div>
-        <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes || 'None'}</div></div>
-      `;
-
-      // Populate patient details
-      document.getElementById('patientDetails').innerHTML = `
-        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName || 'Not specified'}</div></div>
-        <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone || 'Not specified'}</div></div>
-        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail || 'Not specified'}</div></div>
-        <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress || 'Not specified'}</div></div>
-      `;
-
-      // Populate prescription items
-      const prescriptionItems = document.getElementById('prescriptionItems');
-      prescriptionItems.innerHTML = '';
-      (prescriptionData.products || []).forEach(product => {
-        const itemTotal = (product.price * product.quantity).toFixed(2);
-        prescriptionItems.innerHTML += `
-          <div class="product-item">
-            <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
-            <div>${itemTotal} PKR</div>
-          </div>
-        `;
-      });
-
-      document.getElementById('prescriptionTotal').textContent = prescriptionData.total || '0.00';
-    }
-
-    function setupEmailButton(prescriptionData, approvalLink) {
-      document.getElementById('sendEmail').addEventListener('click', function() {
-        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
-        let body = `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review your prescription:\n`
-          + `${approvalLink}\n\n`
-          + `Medications:\n${
-            (prescriptionData.products || []).map(p => 
-              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
-            ).join('\n')
-          }\n\n`
-          + `Total: ${prescriptionData.total || '0.00'} PKR\n\n`
-          + `Doctor's Notes: ${prescriptionData.prescriptionNotes || 'None'}\n\n`
-          + `Best regards,\n`
-          + `${prescriptionData.doctorName}\n`
-          + `Merimuskan Pharmacy`;
-
-        // Truncate if too long for URL
-        if (body.length > 1500) {
-          body = `Dear ${prescriptionData.patientName},\n\n`
-            + `Please review your prescription:\n`
-            + `${approvalLink}\n\n`
-            + `[Full details available at the link above]\n\n`
-            + `Best regards,\n`
-            + `${prescriptionData.doctorName}`;
-        }
-
-        // Gmail compose URL
-        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
-          `&to=${encodeURIComponent(prescriptionData.patientEmail || '')}` +
-          `&su=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(body)}` +
-          `&bcc=merimuskanconnect@gmail.com`;
-
-        // Try to open Gmail in new tab
-        const newWindow = window.open(gmailUrl, '_blank');
-        
-        // Fallback to regular mailto if blocked
-        setTimeout(() => {
-          if (!newWindow || newWindow.closed) {
-            window.location.href = `mailto:${prescriptionData.patientEmail || ''}?subject=${
-              encodeURIComponent(subject)
-            }&body=${
-              encodeURIComponent(body)
-            }&bcc=merimuskanconnect@gmail.com`;
-          }
-        }, 500);
-      });
-    }
-
-    function setupCopyAllButton(prescriptionData, approvalLink) {
-      document.getElementById('copyAllDetails').addEventListener('click', function() {
-        const text = `PATIENT PRESCRIPTION\n\n`
-          + `Patient: ${prescriptionData.patientName || 'Not specified'}\n`
-          + `Email: ${prescriptionData.patientEmail || 'Not specified'}\n`
-          + `Phone: ${prescriptionData.patientPhone || 'Not specified'}\n\n`
-          + `APPROVAL LINK:\n${approvalLink}\n\n`
-          + `PRESCRIPTION DETAILS:\n${
-            (prescriptionData.products || []).map(p => 
-              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
-            ).join('\n')
-          }\n\n`
-          + `TOTAL: ${prescriptionData.total || '0.00'} PKR\n\n`
-          + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes || 'None'}\n\n`
-          + `Prescribed by: ${prescriptionData.doctorName || 'Not specified'}\n`
-          + `Issued: ${new Date(prescriptionData.issuedDate || Date.now()).toLocaleDateString()}`;
-        
-        navigator.clipboard.writeText(text)
-          .then(() => alert('All prescription details copied to clipboard!'))
-          .catch(err => {
-            console.error('Copy failed:', err);
-            alert('Failed to copy details. Please try again.');
-          });
-      });
-    }
-
-    function copyToClipboard() {
-      const linkText = document.getElementById('linkText').textContent;
-      if (!linkText) {
-        alert('Link is not ready yet. Please wait.');
-        return;
-      }
-      
-      navigator.clipboard.writeText(linkText)
-        .then(() => alert('Link copied to clipboard!'))
-        .catch(err => {
-          console.error('Failed to copy: ', err);
-          alert('Failed to copy link. Please try again.');
-        });
     }
   </script>
 </body>
