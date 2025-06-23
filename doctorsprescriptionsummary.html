@@ -345,31 +345,31 @@
           .catch(err => console.error('Copy failed:', err));
       });
 
-      // WORKING GAS SUBMISSION - MATCHING POSTMAN FORMAT
+      // WORKING GAS SUBMISSION THAT MATCHES POSTMAN
       function submitToGAS() {
         const payload = {
           rxId: prescriptionId,
           data: prescriptionData
         };
 
-        // Create a temporary iframe
+        // Create a temporary iframe for the response
         const iframe = document.createElement('iframe');
         iframe.style.display = 'none';
-        iframe.name = 'gasFrame';
+        iframe.name = 'gasResponseFrame';
         document.body.appendChild(iframe);
 
-        // Create a form
+        // Create a form that matches Postman's request
         const form = document.createElement('form');
         form.style.display = 'none';
         form.method = 'POST';
         form.action = GAS_ENDPOINT;
-        form.target = 'gasFrame';
+        form.target = 'gasResponseFrame';
         form.enctype = 'application/json';
 
-        // Create a hidden input with the JSON data
+        // Add the JSON data as a hidden input
         const input = document.createElement('input');
         input.type = 'hidden';
-        input.name = 'data';
+        input.name = 'postData';
         input.value = JSON.stringify(payload);
         form.appendChild(input);
 
