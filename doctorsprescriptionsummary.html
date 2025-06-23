@@ -238,12 +238,12 @@
         ''
       )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
 
-      // Immediately show the local version
+      // Immediately show the local version while we try to save to GitHub
       document.getElementById('linkText').textContent = localApprovalLink;
       document.getElementById('linkText').style.display = 'block';
       document.querySelector('.loading-spinner').style.display = 'none';
 
-      // Generate QR Code
+      // Generate QR Code with local link
       const qr = qrcode(0, 'L');
       qr.addData(localApprovalLink);
       qr.make();
@@ -278,7 +278,7 @@
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // Gmail integration
+      // GMAIL INTEGRATION
       document.getElementById('sendEmail').addEventListener('click', function() {
         const subject = `Your Prescription from ${prescriptionData.doctorName}`;
         let body = `Dear ${prescriptionData.patientName},\n\n`
@@ -345,23 +345,37 @@
           .catch(err => console.error('Copy failed:', err));
       });
 
-      // Submit to Google Apps Script (working solution)
-      const form = document.createElement('form');
-      form.style.display = 'none';
-      form.method = 'POST';
-      form.action = GAS_ENDPOINT;
-      
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'data';
-      input.value = JSON.stringify({
-        rxId: prescriptionId,
-        data: prescriptionData
-      });
-      form.appendChild(input);
-      
-      document.body.appendChild(form);
-      form.submit();
+      // WORKING GAS SUBMISSION - FIXED VERSION
+      function submitToGAS() {
+        const payload = {
+          rxId: prescriptionId,
+          data: prescriptionData
+        };
+
+        // Create a hidden form
+        const form = document.createElement('form');
+        form.style.display = 'none';
+        form.method = 'POST';
+        form.action = GAS_ENDPOINT;
+        form.enctype = 'application/json';  // Set content type
+        
+        // Create hidden input for the data
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'postData';  // Match what your GAS expects
+        input.value = JSON.stringify(payload);
+        form.appendChild(input);
+
+        // Add form to document and submit
+        document.body.appendChild(form);
+        form.submit();
+        
+        // Clean up after submission
+        setTimeout(() => document.body.removeChild(form), 1000);
+      }
+
+      // Call the submission function
+      submitToGAS();
     });
 
     function copyToClipboard() {
