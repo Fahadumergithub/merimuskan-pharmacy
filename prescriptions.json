@@ -29,5 +29,14 @@
     "products": [],
     "prescriptionNotes": "Test prescription",
     "expiresAt": "2025-06-30T05:58:12.399Z"
+  },
+  "RX-TEST12345678": {
+    "doctorName": "Dr. Test",
+    "patientName": "Patient Test",
+    "patientEmail": "test@example.com",
+    "patientPhone": "03001234567",
+    "products": [],
+    "prescriptionNotes": "Test prescription",
+    "expiresAt": "2025-06-30T05:58:59.300Z"
   }
 }
