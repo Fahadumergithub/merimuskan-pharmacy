@@ -164,27 +164,6 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    .status-message {
-      padding: 10px;
-      border-radius: 6px;
-      margin: 10px 0;
-      font-size: 14px;
-    }
-    .status-success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .status-error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .status-warning {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
-    }
   </style>
 </head>
 <body>
@@ -219,7 +198,6 @@
         <div class="loading-spinner"></div>
         <div id="linkText" style="display: none;"></div>
       </div>
-      <div id="statusMessage"></div>
       <p class="expiry-notice">This link will expire in 7 days</p>
       <p class="url-warning">Note: Long URLs are safe - they contain your prescription data</p>
       
@@ -243,39 +221,36 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script>
     const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbydcwMR_gCvg1GrFF0OplPCfk8BCHyGGcTzwBPGfte9KxJbhyN8CskRvtypsD9tF71ajQ/exec";
-    
-    let prescriptionData;
-    let prescriptionId;
-    let finalApprovalLink;
 
     document.addEventListener('DOMContentLoaded', function() {
-      prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
+      const prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
       if (!prescriptionData) {
         window.location.href = 'doctorsprescriptionportal.html';
         return;
       }
 
       // Generate prescription ID
-      prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
+      const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
       
-      // Create fallback local approval link
-      const localApprovalLink = `https://fahadumergithub.github.io/merimuskan-pharmacy/doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
-      
-      // Show fallback link initially
-      finalApprovalLink = localApprovalLink;
-      updateLinkDisplay(localApprovalLink, 'warning', 'Using fallback link - attempting to save to database...');
+      // Create local approval link
+      const localApprovalLink = `${window.location.href.replace(
+        'doctorsprescriptionsummary.html', 
+        ''
+      )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
 
-      // Populate all the prescription details
-      populatePrescriptionDetails();
-      
-      // Try to submit to GAS
-      submitToGAS();
-    });
+      // Immediately show the local version while we try to save to GitHub
+      document.getElementById('linkText').textContent = localApprovalLink;
+      document.getElementById('linkText').style.display = 'block';
+      document.querySelector('.loading-spinner').style.display = 'none';
 
-    function populatePrescriptionDetails() {
+      // Generate QR Code with local link
+      const qr = qrcode(0, 'L');
+      qr.addData(localApprovalLink);
+      qr.make();
+      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
+
       // Populate prescription details
       document.getElementById('prescriptionDetails').innerHTML = `
-        <div class="info-row"><div class="info-label">Prescription ID:</div><div class="info-value">${prescriptionId}</div></div>
         <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
         <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
         <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
@@ -302,179 +277,127 @@
       });
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
-    }
 
-    function updateLinkDisplay(link, status, message) {
-      const linkElement = document.getElementById('linkText');
-      const spinnerElement = document.querySelector('.loading-spinner');
-      const statusElement = document.getElementById('statusMessage');
-      
-      linkElement.textContent = link;
-      linkElement.style.display = 'block';
-      spinnerElement.style.display = 'none';
-      
-      if (message) {
-        statusElement.innerHTML = `<div class="status-message status-${status}">${message}</div>`;
-      }
-      
-      // Update QR code
-      updateQRCode(link);
-    }
+      // GMAIL INTEGRATION
+      document.getElementById('sendEmail').addEventListener('click', function() {
+        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
+        let body = `Dear ${prescriptionData.patientName},\n\n`
+          + `Please review your prescription:\n`
+          + `${localApprovalLink}\n\n`
+          + `Medications:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `Total: ${prescriptionData.total} PKR\n\n`
+          + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
+          + `Best regards,\n`
+          + `${prescriptionData.doctorName}\n`
+          + `Merimuskan Pharmacy`;
 
-    function updateQRCode(link) {
-      const qr = qrcode(0, 'L');
-      qr.addData(link);
-      qr.make();
-      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
-    }
-
-    function submitToGAS() {
-      const payload = {
-        rxId: prescriptionId,
-        data: prescriptionData
-      };
-
-      // Create a hidden iframe for CORS-free POST request
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.name = 'gasSubmissionFrame';
-      document.body.appendChild(iframe);
-
-      // Create form with proper JSON payload
-      const form = document.createElement('form');
-      form.style.display = 'none';
-      form.method = 'POST';
-      form.action = GAS_ENDPOINT;
-      form.target = 'gasSubmissionFrame';
-
-      // Add JSON data as form field (this is the key fix!)
-      const input = document.createElement('textarea');
-      input.name = 'postData';
-      input.value = JSON.stringify(payload);
-      form.appendChild(input);
-
-      document.body.appendChild(form);
-      
-      // Set up response handler
-      let responseReceived = false;
-      
-      // Listen for response via postMessage (if GAS sends it)
-      window.addEventListener('message', function(event) {
-        if (event.origin === 'https://script.google.com') {
-          responseReceived = true;
-          handleGASResponse(event.data);
+        if (body.length > 1500) {
+          body = `Dear ${prescriptionData.patientName},\n\n`
+            + `Please review your prescription:\n`
+            + `${localApprovalLink}\n\n`
+            + `[Full details available at the link above]\n\n`
+            + `Best regards,\n`
+            + `${prescriptionData.doctorName}`;
         }
+
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
+          `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
+          `&su=${encodeURIComponent(subject)}` +
+          `&body=${encodeURIComponent(body)}` +
+          `&bcc=merimuskanconnect@gmail.com`;
+
+        const newWindow = window.open(gmailUrl, '_blank');
+        
+        setTimeout(() => {
+          if (!newWindow || newWindow.closed) {
+            window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
+              encodeURIComponent(subject)
+            }&body=${
+              encodeURIComponent(body)
+            }&bcc=merimuskanconnect@gmail.com`;
+          }
+        }, 500);
       });
 
-      // Submit form
-      form.submit();
-      
-      // Fallback timeout - assume success if no error after 5 seconds
-      setTimeout(() => {
-        if (!responseReceived) {
-          // Assume success and use GitHub Pages link
-          const githubLink = `https://fahadumergithub.github.io/merimuskan-pharmacy/doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
-          finalApprovalLink = githubLink;
-          updateLinkDisplay(githubLink, 'success', 'Prescription saved successfully! Link is ready to share.');
-        }
+      // Copy All Details Button
+      document.getElementById('copyAllDetails').addEventListener('click', function() {
+        const text = `PATIENT PRESCRIPTION\n\n`
+          + `Patient: ${prescriptionData.patientName}\n`
+          + `Email: ${prescriptionData.patientEmail}\n`
+          + `Phone: ${prescriptionData.patientPhone}\n\n`
+          + `APPROVAL LINK:\n${localApprovalLink}\n\n`
+          + `PRESCRIPTION DETAILS:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `TOTAL: ${prescriptionData.total} PKR\n\n`
+          + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
+          + `Prescribed by: ${prescriptionData.doctorName}\n`
+          + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
         
-        // Clean up
-        if (document.body.contains(form)) {
-          document.body.removeChild(form);
-        }
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-      }, 5000);
-    }
+        navigator.clipboard.writeText(text)
+          .then(() => alert('All prescription details copied to clipboard!'))
+          .catch(err => console.error('Copy failed:', err));
+      });
 
-    function handleGASResponse(data) {
-      try {
-        const response = typeof data === 'string' ? JSON.parse(data) : data;
-        
-        if (response.success && response.approvalLink) {
-          finalApprovalLink = response.approvalLink;
-          updateLinkDisplay(response.approvalLink, 'success', 'Prescription saved successfully! Link is ready to share.');
-        } else {
-          updateLinkDisplay(finalApprovalLink, 'error', `Error saving prescription: ${response.error || 'Unknown error'}`);
+      // NEW GAS SUBMISSION METHOD THAT WORKS
+      async function submitToGAS() {
+        const payload = {
+          rxId: prescriptionId,
+          data: prescriptionData
+        };
+
+        try {
+          // First try with fetch
+          const response = await fetch(GAS_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+          });
+          console.log('Data sent to GAS via fetch');
+        } catch (error) {
+          console.log('Fallback to form submission');
+          // Fallback method using form submission
+          const form = document.createElement('form');
+          form.style.display = 'none';
+          form.method = 'POST';
+          form.action = GAS_ENDPOINT;
+          form.target = '_blank'; // Open in new tab to avoid navigation
+          
+          const rxInput = document.createElement('input');
+          rxInput.type = 'hidden';
+          rxInput.name = 'rxId';
+          rxInput.value = prescriptionId;
+          form.appendChild(rxInput);
+          
+          const dataInput = document.createElement('input');
+          dataInput.type = 'hidden';
+          dataInput.name = 'data';
+          dataInput.value = JSON.stringify(prescriptionData);
+          form.appendChild(dataInput);
+          
+          document.body.appendChild(form);
+          form.submit();
+          
+          setTimeout(() => document.body.removeChild(form), 1000);
         }
-      } catch (e) {
-        updateLinkDisplay(finalApprovalLink, 'warning', 'Prescription submitted - using fallback link.');
-      }
-    }
-
-    // GMAIL INTEGRATION
-    document.getElementById('sendEmail').addEventListener('click', function() {
-      const subject = `Your Prescription from ${prescriptionData.doctorName}`;
-      let body = `Dear ${prescriptionData.patientName},\n\n`
-        + `Please review your prescription:\n`
-        + `${finalApprovalLink}\n\n`
-        + `Prescription ID: ${prescriptionId}\n\n`
-        + `Medications:\n${
-          prescriptionData.products.map(p => 
-            `- ${p.name} (${p.quantity} × ${p.price} PKR)`
-          ).join('\n')
-        }\n\n`
-        + `Total: ${prescriptionData.total} PKR\n\n`
-        + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
-        + `Best regards,\n`
-        + `${prescriptionData.doctorName}\n`
-        + `Merimuskan Pharmacy`;
-
-      if (body.length > 1500) {
-        body = `Dear ${prescriptionData.patientName},\n\n`
-          + `Please review your prescription:\n`
-          + `${finalApprovalLink}\n\n`
-          + `Prescription ID: ${prescriptionId}\n\n`
-          + `[Full details available at the link above]\n\n`
-          + `Best regards,\n`
-          + `${prescriptionData.doctorName}`;
       }
 
-      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
-        `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
-        `&su=${encodeURIComponent(subject)}` +
-        `&body=${encodeURIComponent(body)}` +
-        `&bcc=merimuskanconnect@gmail.com`;
-
-      const newWindow = window.open(gmailUrl, '_blank');
-      
-      setTimeout(() => {
-        if (!newWindow || newWindow.closed) {
-          window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
-            encodeURIComponent(subject)
-          }&body=${
-            encodeURIComponent(body)
-          }&bcc=merimuskanconnect@gmail.com`;
-        }
-      }, 500);
-    });
-
-    // Copy All Details Button
-    document.getElementById('copyAllDetails').addEventListener('click', function() {
-      const text = `PATIENT PRESCRIPTION\n\n`
-        + `Prescription ID: ${prescriptionId}\n`
-        + `Patient: ${prescriptionData.patientName}\n`
-        + `Email: ${prescriptionData.patientEmail}\n`
-        + `Phone: ${prescriptionData.patientPhone}\n\n`
-        + `APPROVAL LINK:\n${finalApprovalLink}\n\n`
-        + `PRESCRIPTION DETAILS:\n${
-          prescriptionData.products.map(p => 
-            `- ${p.name} (${p.quantity} × ${p.price} PKR)`
-          ).join('\n')
-        }\n\n`
-        + `TOTAL: ${prescriptionData.total} PKR\n\n`
-        + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
-        + `Prescribed by: ${prescriptionData.doctorName}\n`
-        + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
-      
-      navigator.clipboard.writeText(text)
-        .then(() => alert('All prescription details copied to clipboard!'))
-        .catch(err => console.error('Copy failed:', err));
+      // Call the submission function
+      submitToGAS();
     });
 
     function copyToClipboard() {
-      navigator.clipboard.writeText(finalApprovalLink).then(() => {
+      const linkText = document.getElementById('linkText').textContent;
+      navigator.clipboard.writeText(linkText).then(() => {
         alert('Link copied to clipboard!');
       }).catch(err => {
         console.error('Failed to copy: ', err);
