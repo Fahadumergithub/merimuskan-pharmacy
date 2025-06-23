@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Approve Your Prescription - Merimuskan</title>
+  <title>Prescription Summary - Merimuskan</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -13,7 +13,7 @@
       padding: 0;
       color: #2C3345;
     }
-    .confirmation-container {
+    .summary-container {
       max-width: 752px;
       margin: 40px auto;
       background: #fff;
@@ -21,44 +21,21 @@
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
-    .confirmation-header {
+    .summary-header {
       text-align: center;
       margin-bottom: 32px;
     }
-    .confirmation-header .icon {
-      width: 64px;
-      height: 64px;
-      background-color: #4299e1;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      color: white;
-      font-size: 32px;
-      font-weight: bold;
-    }
-    .confirmation-header h1 {
+    .summary-header h1 {
       margin: 0;
       font-size: 24px;
       font-weight: 600;
     }
-    .confirmation-header p {
-      margin: 8px 0 0;
-      color: #666;
-    }
-    .order-summary {
-      margin-bottom: 32px;
-    }
     .section-title {
       font-size: 18px;
       font-weight: 600;
-      margin: 0 0 16px;
+      margin: 24px 0 16px;
       padding-bottom: 8px;
       border-bottom: 1px solid #eee;
-    }
-    .doctor-info, .patient-info {
-      margin-bottom: 24px;
     }
     .info-row {
       display: flex;
@@ -66,7 +43,7 @@
     }
     .info-label {
       font-weight: 500;
-      width: 120px;
+      width: 150px;
       color: #666;
     }
     .info-value {
@@ -92,150 +69,191 @@
       margin: 0;
       font-size: 18px;
     }
+    .approval-link {
+      background: #f0f7ff;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 30px 0;
+      border-left: 4px solid #4299e1;
+    }
+    .link-box {
+      background: white;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin: 10px 0;
+      word-break: break-all;
+    }
     .action-buttons {
       display: flex;
       justify-content: space-between;
       margin-top: 32px;
+      gap: 15px;
     }
-    .reject-button, .approve-button {
+    .action-buttons button, .action-buttons a {
+      flex: 1;
+      text-align: center;
+    }
+    .back-button, .send-button, .copy-button {
       padding: 12px 24px;
       border-radius: 6px;
       font-weight: 500;
       cursor: pointer;
       text-decoration: none;
       font-size: 16px;
+      border: none;
     }
-    .reject-button {
+    .back-button {
       background: #f0f0f0;
       color: #333;
-      border: none;
     }
-    .approve-button {
+    .send-button {
       background: #4299e1;
       color: white;
-      border: none;
-      display: flex;
-      align-items: center;
     }
-    .approve-button:hover {
+    .copy-button {
+      background: #4CAF50;
+      color: white;
+    }
+    .send-button:hover {
       background: #3182ce;
     }
+    .copy-button:hover {
+      background: #3e8e41;
+    }
+    .expiry-notice {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    .qr-section {
+      text-align: center;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    .qr-section h3 {
+      margin-top: 0;
+    }
+    #qrCode img {
+      margin: 0 auto;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .url-warning {
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
+      margin-top: 5px;
+    }
     .loading-spinner {
-      display: none;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
+      border: 4px solid rgba(0, 0, 0, 0.1);
       border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-      margin-right: 10px;
+      border-top: 4px solid #4299e1;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
     }
     @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .prescription-notes {
-      background: #ebf8ff;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-      border-left: 4px solid #4299e1;
-    }
-    .loading-state {
-      display: none;
-      text-align: center;
-      padding: 20px;
-    }
-    #confirmation-content {
-      display: none;
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div id="loadingState" class="loading-state">
-    <p>Loading your prescription...</p>
-  </div>
-
-  <div id="confirmation-content" class="confirmation-container">
-    <div class="confirmation-header">
-      <div class="icon">℞</div>
-      <h1>Review Your Prescription</h1>
-      <p>Please verify your prescription details before approval</p>
+  <div class="summary-container">
+    <div class="summary-header">
+      <h1>Prescription Summary</h1>
+      <p>Review and share this prescription with your patient</p>
     </div>
 
-    <div class="order-summary">
-      <div class="doctor-info">
-        <h2 class="section-title">Doctor Information</h2>
-        <div id="doctorDetails"></div>
-      </div>
+    <div class="prescription-info">
+      <h2 class="section-title">Prescription Details</h2>
+      <div id="prescriptionDetails"></div>
+    </div>
 
-      <div class="patient-info">
-        <h2 class="section-title">Your Information</h2>
-        <div id="patientDetails"></div>
-      </div>
+    <div class="patient-info">
+      <h2 class="section-title">Patient Information</h2>
+      <div id="patientDetails"></div>
+    </div>
 
-      <div id="prescriptionNotesContainer" class="prescription-notes">
-        <h3>Doctor's Instructions</h3>
-        <p id="prescriptionNotes"></p>
+    <div class="products-summary">
+      <h2 class="section-title">Medications</h2>
+      <div id="prescriptionItems"></div>
+      <div class="total-section">
+        <h3>Estimated Total: <span id="prescriptionTotal">0.00</span> PKR</h3>
       </div>
+    </div>
 
-      <div class="products-summary">
-        <h2 class="section-title">Prescribed Medications</h2>
-        <div id="orderItems"></div>
-        <div class="total-section">
-          <h3>Total: <span id="orderTotal">0.00</span> PKR</h3>
-        </div>
+    <div class="approval-link">
+      <h3>Patient Approval Link</h3>
+      <p>Share this link with your patient to approve the prescription:</p>
+      <div class="link-box" id="approvalLink">
+        <div class="loading-spinner"></div>
+        <div id="linkText" style="display: none;"></div>
       </div>
+      <p class="expiry-notice">This link will expire in 7 days</p>
+      <p class="url-warning">Note: Long URLs are safe - they contain your prescription data</p>
+      
+      <div class="button-group">
+        <button onclick="copyToClipboard()" class="copy-button">Copy Link</button>
+        <button id="copyAllDetails" class="copy-button">Copy All Details</button>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <h3>Scan to Share</h3>
+      <div id="qrCode"></div>
     </div>
 
     <div class="action-buttons">
-      <button id="rejectPrescription" class="reject-button">Request Changes</button>
-      <button id="approvePrescription" class="approve-button">
-        <span id="spinner" class="loading-spinner"></span>
-        Approve Prescription
-      </button>
+      <a href="doctorsprescriptionportal.html" class="back-button">Back to Edit</a>
+      <button id="sendEmail" class="send-button">Send via Gmail</button>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <script>
-    emailjs.init("iTzoppHcrXT5MN1Iq");
+    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbydcwMR_gCvg1GrFF0OplPCfk8BCHyGGcTzwBPGfte9KxJbhyN8CskRvtypsD9tF71ajQ/exec";
 
     document.addEventListener('DOMContentLoaded', function() {
-      // Show loading state initially
-      document.getElementById('loadingState').style.display = 'block';
-      
-      // Get data from URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const prescriptionId = urlParams.get('rx');
-      
-      if (!prescriptionId) {
-        alert('Invalid prescription link');
-        window.location.href = 'index.html';
+      const prescriptionData = JSON.parse(sessionStorage.getItem('prescriptionData'));
+      if (!prescriptionData) {
+        window.location.href = 'doctorsprescriptionportal.html';
         return;
       }
 
-      // Retrieve from localStorage
-      const storedData = localStorage.getItem(`rx-${prescriptionId}`);
-      if (!storedData) {
-        alert('Prescription not found. Please ask your doctor to resend.');
-        window.location.href = 'index.html';
-        return;
-      }
-
-      const prescriptionData = JSON.parse(storedData);
+      // Generate prescription ID
+      const prescriptionId = 'RX-' + Math.floor(1000 + Math.random() * 9000);
       
-      // Check expiration
-      if (Date.now() > prescriptionData.expires) {
-        localStorage.removeItem(`rx-${prescriptionId}`);
-        alert('Prescription link has expired');
-        window.location.href = 'index.html';
-        return;
-      }
+      // Create local approval link
+      const localApprovalLink = `${window.location.href.replace(
+        'doctorsprescriptionsummary.html', 
+        ''
+      )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
 
-      // Populate doctor details
-      document.getElementById('doctorDetails').innerHTML = `
+      // Immediately show the local version while we try to save to GitHub
+      document.getElementById('linkText').textContent = localApprovalLink;
+      document.getElementById('linkText').style.display = 'block';
+      document.querySelector('.loading-spinner').style.display = 'none';
+
+      // Generate QR Code with local link
+      const qr = qrcode(0, 'L');
+      qr.addData(localApprovalLink);
+      qr.make();
+      document.getElementById('qrCode').innerHTML = qr.createImgTag(4);
+
+      // Populate prescription details
+      document.getElementById('prescriptionDetails').innerHTML = `
         <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
         <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
+        <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes}</div></div>
       `;
 
       // Populate patient details
@@ -246,15 +264,11 @@
         <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
       `;
 
-      // Populate prescription notes
-      document.getElementById('prescriptionNotes').textContent = 
-        prescriptionData.prescriptionNotes || "No special instructions provided";
-
-      // Populate order items
-      const orderItems = document.getElementById('orderItems');
+      // Populate prescription items
+      const prescriptionItems = document.getElementById('prescriptionItems');
       prescriptionData.products.forEach(product => {
         const itemTotal = (product.price * product.quantity).toFixed(2);
-        orderItems.innerHTML += `
+        prescriptionItems.innerHTML += `
           <div class="product-item">
             <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
             <div>${itemTotal} PKR</div>
@@ -262,123 +276,130 @@
         `;
       });
 
-      document.getElementById('orderTotal').textContent = prescriptionData.total;
+      document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // Show content after loading
-      document.getElementById('loadingState').style.display = 'none';
-      document.getElementById('confirmation-content').style.display = 'block';
+      // GMAIL INTEGRATION
+      document.getElementById('sendEmail').addEventListener('click', function() {
+        const subject = `Your Prescription from ${prescriptionData.doctorName}`;
+        let body = `Dear ${prescriptionData.patientName},\n\n`
+          + `Please review your prescription:\n`
+          + `${localApprovalLink}\n\n`
+          + `Medications:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `Total: ${prescriptionData.total} PKR\n\n`
+          + `Doctor's Notes: ${prescriptionData.prescriptionNotes}\n\n`
+          + `Best regards,\n`
+          + `${prescriptionData.doctorName}\n`
+          + `Merimuskan Pharmacy`;
 
-      // Google Sheets Web App Endpoint
-      const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3I8UteyaHx7ajZJAY0Ktv0i3O8GTBGqlff3tNIyD2yCc1-_f_K7yRP6q3JmzVfzy7jg/exec";
-
-      async function sendToGoogleSheet(orderData, orderId) {
-        const now = new Date();
-        const payload = {
-          order_id: orderId,
-          date: now.toLocaleDateString(),
-          time: now.toLocaleTimeString(),
-          name: orderData.patientName,
-          phone: orderData.patientPhone,
-          email: orderData.patientEmail,
-          address: orderData.patientAddress,
-          items: orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
-          total: orderData.total,
-          status: "Approved",
-          doctor: orderData.doctorName,
-          type: "Prescription"
-        };
-
-        try {
-          await fetch(GOOGLE_APPS_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-          console.log("✅ Data sent to Google Sheets");
-        } catch (err) {
-          console.error("❌ Failed to send to Google Sheets:", err);
+        if (body.length > 1500) {
+          body = `Dear ${prescriptionData.patientName},\n\n`
+            + `Please review your prescription:\n`
+            + `${localApprovalLink}\n\n`
+            + `[Full details available at the link above]\n\n`
+            + `Best regards,\n`
+            + `${prescriptionData.doctorName}`;
         }
-      }
 
-      // Approve button handler
-      document.getElementById('approvePrescription').addEventListener('click', async function() {
-        const button = this;
-        button.disabled = true;
-        document.getElementById('spinner').style.display = 'inline-block';
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1` +
+          `&to=${encodeURIComponent(prescriptionData.patientEmail)}` +
+          `&su=${encodeURIComponent(subject)}` +
+          `&body=${encodeURIComponent(body)}` +
+          `&bcc=merimuskanconnect@gmail.com`;
 
-        try {
-          const now = new Date();
-          const productsText = prescriptionData.products.map(p =>
-            `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
-          ).join('\n');
-
-          const orderSummary = `Prescription ID: ${prescriptionId}
-Approval Date: ${now.toLocaleDateString()}
-
-DOCTOR:
-${prescriptionData.doctorName}
-
-PATIENT DETAILS:
-Name: ${prescriptionData.patientName}
-Phone: ${prescriptionData.patientPhone}
-Email: ${prescriptionData.patientEmail}
-Address: ${prescriptionData.patientAddress}
-
-PRESCRIPTION NOTES:
-${prescriptionData.prescriptionNotes}
-
-MEDICATIONS:
-${productsText}
-
-TOTAL: ${prescriptionData.total} PKR`;
-
-          // Send confirmation emails
-          await emailjs.send("service_cor6xnd", "template_3e494ui", {
-            name: prescriptionData.patientName,
-            order_id: prescriptionId,
-            order_summary: orderSummary,
-            total: prescriptionData.total,
-            phone: prescriptionData.patientPhone,
-            email: prescriptionData.patientEmail
-          });
-
-          await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-            customer_name: prescriptionData.patientName,
-            customer_phone: prescriptionData.patientPhone,
-            customer_email: prescriptionData.patientEmail,
-            order_id: prescriptionId,
-            order_summary: orderSummary,
-            order_total: prescriptionData.total,
-            order_timestamp: now.toLocaleString(),
-            doctor_name: prescriptionData.doctorName
-          });
-
-          await sendToGoogleSheet(prescriptionData, prescriptionId);
-
-          // Clear the prescription from storage after approval
-          localStorage.removeItem(`rx-${prescriptionId}`);
-
-          window.location.href = 'thankyou.html';
-        } catch (error) {
-          console.error("Error:", error);
-          alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
-          window.location.href = 'thankyou.html';
-        } finally {
-          button.disabled = false;
-          document.getElementById('spinner').style.display = 'none';
-        }
+        const newWindow = window.open(gmailUrl, '_blank');
+        
+        setTimeout(() => {
+          if (!newWindow || newWindow.closed) {
+            window.location.href = `mailto:${prescriptionData.patientEmail}?subject=${
+              encodeURIComponent(subject)
+            }&body=${
+              encodeURIComponent(body)
+            }&bcc=merimuskanconnect@gmail.com`;
+          }
+        }, 500);
       });
 
-      // Reject button handler
-      document.getElementById('rejectPrescription').addEventListener('click', function() {
-        if (confirm("Request changes to this prescription? The doctor will be notified.")) {
-          // In a full implementation, we would send an email to the doctor here
-          alert("Your request has been noted. The doctor will contact you shortly.");
-          window.location.href = 'index.html';
-        }
+      // Copy All Details Button
+      document.getElementById('copyAllDetails').addEventListener('click', function() {
+        const text = `PATIENT PRESCRIPTION\n\n`
+          + `Patient: ${prescriptionData.patientName}\n`
+          + `Email: ${prescriptionData.patientEmail}\n`
+          + `Phone: ${prescriptionData.patientPhone}\n\n`
+          + `APPROVAL LINK:\n${localApprovalLink}\n\n`
+          + `PRESCRIPTION DETAILS:\n${
+            prescriptionData.products.map(p => 
+              `- ${p.name} (${p.quantity} × ${p.price} PKR)`
+            ).join('\n')
+          }\n\n`
+          + `TOTAL: ${prescriptionData.total} PKR\n\n`
+          + `DOCTOR NOTES:\n${prescriptionData.prescriptionNotes}\n\n`
+          + `Prescribed by: ${prescriptionData.doctorName}\n`
+          + `Issued: ${new Date(prescriptionData.issuedDate).toLocaleDateString()}`;
+        
+        navigator.clipboard.writeText(text)
+          .then(() => alert('All prescription details copied to clipboard!'))
+          .catch(err => console.error('Copy failed:', err));
       });
+
+      // Save to GitHub using form submission
+      saveToGitHub(prescriptionId, prescriptionData);
     });
+
+    function copyToClipboard() {
+      const linkText = document.getElementById('linkText').textContent;
+      navigator.clipboard.writeText(linkText).then(() => {
+        alert('Link copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy link. Please try again.');
+      });
+    }
+
+    function saveToGitHub(prescriptionId, prescriptionData) {
+      try {
+        console.log("Saving to GitHub via form submission...");
+        
+        // Create a hidden form
+        const form = document.createElement('form');
+        form.style.display = 'none';
+        form.method = 'POST';
+        form.action = GAS_ENDPOINT;
+        form.target = 'hiddenFrame';
+
+        // Create hidden input for the data
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = JSON.stringify({
+          rxId: prescriptionId,
+          data: prescriptionData
+        });
+        form.appendChild(input);
+
+        // Create a hidden iframe for the response
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hiddenFrame';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
+
+        // Submit the form
+        form.submit();
+
+        // Clean up after submission
+        setTimeout(() => {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+        }, 1000);
+
+      } catch (error) {
+        console.error("Error in saveToGitHub:", error);
+      }
+    }
   </script>
 </body>
 </html>
