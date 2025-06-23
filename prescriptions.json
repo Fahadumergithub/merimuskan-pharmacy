@@ -57,5 +57,17 @@
       }
     ],
     "expiresAt": "2025-06-30T07:26:22.883Z"
+  },
+  "RX-2906": {
+    "doctorName": "Amna",
+    "patientName": "arsalan",
+    "patientPhone": "03332165755",
+    "patientEmail": "dr.fahadumer@gmail.com",
+    "patientAddress": "27/1 5th commercial street phase 4",
+    "prescriptionNotes": "Take medications",
+    "issuedDate": "2025-06-23",
+    "total": "0.00",
+    "products": [],
+    "expiresAt": "2025-06-30T08:56:35.318Z"
   }
 }
