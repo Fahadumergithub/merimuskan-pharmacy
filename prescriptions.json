@@ -75,8 +75,10 @@
     "patientName": "Patient Test",
     "patientEmail": "test@example.com",
     "patientPhone": "030012345678",
-    "products": [],
+    "products": [
+      "panadol"
+    ],
     "prescriptionNotes": "Test prescription",
-    "expiresAt": "2025-06-30T12:11:36.798Z"
+    "expiresAt": "2025-06-30T12:11:56.578Z"
   }
 }
