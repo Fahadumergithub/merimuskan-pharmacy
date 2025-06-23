@@ -34,9 +34,9 @@
     "doctorName": "Dr. Test",
     "patientName": "Patient Test",
     "patientEmail": "test@example.com",
-    "patientPhone": "03001234567",
+    "patientPhone": "030012345678",
     "products": [],
     "prescriptionNotes": "Test prescription",
-    "expiresAt": "2025-06-30T05:58:59.300Z"
+    "expiresAt": "2025-06-30T07:12:53.002Z"
   }
 }
