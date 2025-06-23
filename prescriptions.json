@@ -69,5 +69,14 @@
     "total": "0.00",
     "products": [],
     "expiresAt": "2025-06-30T08:56:35.318Z"
+  },
+  "TX-TEST12345678": {
+    "doctorName": "Dr. Test",
+    "patientName": "Patient Test",
+    "patientEmail": "test@example.com",
+    "patientPhone": "030012345678",
+    "products": [],
+    "prescriptionNotes": "Test prescription",
+    "expiresAt": "2025-06-30T11:32:18.122Z"
   }
 }
