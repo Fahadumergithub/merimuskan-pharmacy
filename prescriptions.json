@@ -20,5 +20,14 @@
       }
     ],
     "total": "350"
+  },
+  "RX-TEST12345": {
+    "doctorName": "Dr. Test",
+    "patientName": "Patient Test",
+    "patientEmail": "test@example.com",
+    "patientPhone": "03001234567",
+    "products": [],
+    "prescriptionNotes": "Test prescription",
+    "expiresAt": "2025-06-30T04:54:53.293Z"
   }
 }
