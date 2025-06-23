@@ -238,12 +238,12 @@
         ''
       )}doctorsprescriptionconfirmation.html?rx=${prescriptionId}`;
 
-      // Immediately show the local version while we try to save to GitHub
+      // Immediately show the local version
       document.getElementById('linkText').textContent = localApprovalLink;
       document.getElementById('linkText').style.display = 'block';
       document.querySelector('.loading-spinner').style.display = 'none';
 
-      // Generate QR Code with local link
+      // Generate QR Code
       const qr = qrcode(0, 'L');
       qr.addData(localApprovalLink);
       qr.make();
@@ -278,7 +278,7 @@
 
       document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-      // GMAIL INTEGRATION
+      // Gmail integration
       document.getElementById('sendEmail').addEventListener('click', function() {
         const subject = `Your Prescription from ${prescriptionData.doctorName}`;
         let body = `Dear ${prescriptionData.patientName},\n\n`
@@ -345,8 +345,23 @@
           .catch(err => console.error('Copy failed:', err));
       });
 
-      // Enhanced saveToGitHub function with CORS handling
-      saveToGitHub(prescriptionId, prescriptionData, localApprovalLink);
+      // Submit to Google Apps Script (working solution)
+      const form = document.createElement('form');
+      form.style.display = 'none';
+      form.method = 'POST';
+      form.action = GAS_ENDPOINT;
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = JSON.stringify({
+        rxId: prescriptionId,
+        data: prescriptionData
+      });
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      form.submit();
     });
 
     function copyToClipboard() {
@@ -357,58 +372,6 @@
         console.error('Failed to copy: ', err);
         alert('Failed to copy link. Please try again.');
       });
-    }
-
-    async function saveToGitHub(prescriptionId, prescriptionData, approvalLink) {
-      try {
-        console.log("Attempting to save to GitHub...");
-        
-        const payload = {
-          rxId: prescriptionId,
-          data: prescriptionData,
-          approvalLink: approvalLink,
-          timestamp: new Date().toISOString()
-        };
-
-        // Method 1: Standard POST with JSON
-        let response = await fetch(GAS_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        // If method 1 fails, try method 2: FormData
-        if (!response.ok) {
-          console.log("Standard POST failed, trying FormData approach...");
-          const formData = new FormData();
-          formData.append('data', JSON.stringify(payload));
-          
-          response = await fetch(GAS_ENDPOINT, {
-            method: 'POST',
-            body: formData
-          });
-        }
-
-        // If still failing, try method 3: GET with URL params
-        if (!response.ok) {
-          console.log("FormData POST failed, trying GET with URL params...");
-          const params = new URLSearchParams();
-          params.append('data', JSON.stringify(payload));
-          
-          response = await fetch(`${GAS_ENDPOINT}?${params.toString()}`, {
-            method: 'GET'
-          });
-        }
-
-        // Process response
-        const result = await response.text();
-        console.log("GitHub save result:", result);
-        
-      } catch (error) {
-        console.error("Error saving to GitHub:", error);
-      }
     }
   </script>
 </body>
