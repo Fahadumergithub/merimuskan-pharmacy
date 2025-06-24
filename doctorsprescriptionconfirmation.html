@@ -210,7 +210,7 @@
       <button id="rejectPrescription" class="reject-button">Request Changes</button>
       <button id="approvePrescription" class="approve-button">
         <span id="spinner" class="loading-spinner"></span>
-        Approve Prescription
+        Approve and Confirm Order
       </button>
     </div>
   </div>
@@ -316,7 +316,7 @@
 
           // Populate order items
           const orderItems = document.getElementById('orderItems');
-          orderItems.innerHTML = ''; // Clear existing items
+          orderItems.innerHTML = '';
           prescriptionData.products.forEach(product => {
             const itemTotal = (parseFloat(product.price) * parseInt(product.quantity)).toFixed(2);
             orderItems.innerHTML += `
@@ -333,7 +333,7 @@
           document.getElementById('loadingState').style.display = 'none';
           document.getElementById('confirmation-content').style.display = 'block';
 
-          // Approve button handler
+          // Approve button handler - FIXED to properly redirect after completion
           document.getElementById('approvePrescription').addEventListener('click', async function() {
             const button = this;
             button.disabled = true;
@@ -365,37 +365,37 @@ ${productsText}
 
 TOTAL: ${prescriptionData.total} PKR`;
 
-              // Send confirmation emails
-              await emailjs.send("service_cor6xnd", "template_3e494ui", {
-                name: prescriptionData.patientName,
-                order_id: prescriptionId,
-                order_summary: orderSummary,
-                total: prescriptionData.total,
-                phone: prescriptionData.patientPhone,
-                email: prescriptionData.patientEmail
-              });
+              // Execute all async operations sequentially
+              await Promise.all([
+                emailjs.send("service_cor6xnd", "template_3e494ui", {
+                  name: prescriptionData.patientName,
+                  order_id: prescriptionId,
+                  order_summary: orderSummary,
+                  total: prescriptionData.total,
+                  phone: prescriptionData.patientPhone,
+                  email: prescriptionData.patientEmail
+                }),
+                emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+                  customer_name: prescriptionData.patientName,
+                  customer_phone: prescriptionData.patientPhone,
+                  customer_email: prescriptionData.patientEmail,
+                  order_id: prescriptionId,
+                  order_summary: orderSummary,
+                  order_total: prescriptionData.total,
+                  order_timestamp: now.toLocaleString(),
+                  doctor_name: prescriptionData.doctorName
+                }),
+                sendToGoogleSheet(prescriptionData, prescriptionId)
+              ]);
 
-              await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                customer_name: prescriptionData.patientName,
-                customer_phone: prescriptionData.patientPhone,
-                customer_email: prescriptionData.patientEmail,
-                order_id: prescriptionId,
-                order_summary: orderSummary,
-                order_total: prescriptionData.total,
-                order_timestamp: now.toLocaleString(),
-                doctor_name: prescriptionData.doctorName
-              });
-
-              await sendToGoogleSheet(prescriptionData, prescriptionId);
-
+              // Only redirect after all operations complete
               window.location.href = 'thankyou.html';
+              
             } catch (error) {
               console.error("Error:", error);
+              // Still redirect but show alert
               alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
               window.location.href = 'thankyou.html';
-            } finally {
-              button.disabled = false;
-              document.getElementById('spinner').style.display = 'none';
             }
           });
 
