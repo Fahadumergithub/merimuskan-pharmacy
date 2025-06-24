@@ -167,5 +167,36 @@
       }
     ],
     "expiresAt": "2025-07-01T05:10:21.430Z"
+  },
+  "RX-7194": {
+    "doctorName": "asd",
+    "patientName": "asd",
+    "patientPhone": "aa",
+    "patientEmail": "syed.arsalan@medentec.com",
+    "patientAddress": "aas",
+    "prescriptionNotes": "asds",
+    "issuedDate": "2025-06-24",
+    "total": "503.00",
+    "products": [
+      {
+        "id": "1004",
+        "name": "Ansaid Tablet 100mg",
+        "price": "121",
+        "quantity": "1"
+      },
+      {
+        "id": "1005",
+        "name": "Augmentin Tablet 1g",
+        "price": "338",
+        "quantity": "1"
+      },
+      {
+        "id": "1007",
+        "name": "Flagyl Tablet 400mg",
+        "price": "44",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-01T06:31:19.628Z"
   }
 }
