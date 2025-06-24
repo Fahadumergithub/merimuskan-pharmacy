@@ -80,5 +80,30 @@
     ],
     "prescriptionNotes": "Test prescription",
     "expiresAt": "2025-06-30T12:11:56.578Z"
+  },
+  "RX-1697": {
+    "doctorName": "fahad",
+    "patientName": "arsalan",
+    "patientPhone": "03332165755",
+    "patientEmail": "dr.fahadumer@gmail.com",
+    "patientAddress": "27/1 5th commercial street phase 4",
+    "prescriptionNotes": "Hi",
+    "issuedDate": "2025-06-24",
+    "total": "170.00",
+    "products": [
+      {
+        "id": "1000",
+        "name": "Panadol Tablet 500mg",
+        "price": "33.5",
+        "quantity": "1"
+      },
+      {
+        "id": "1001",
+        "name": "Panadol Children's",
+        "price": "136.5",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-01T04:41:39.961Z"
   }
 }
