@@ -229,5 +229,30 @@
       }
     ],
     "expiresAt": "2025-07-01T06:39:22.546Z"
+  },
+  "RX-6534": {
+    "doctorName": "ad",
+    "patientName": "aa",
+    "patientPhone": "aaa",
+    "patientEmail": "syed.arsalan@medentec.com",
+    "patientAddress": "aa",
+    "prescriptionNotes": "aaa",
+    "issuedDate": "2025-06-24",
+    "total": "416.00",
+    "products": [
+      {
+        "id": "1011",
+        "name": "Prodent Toothpaste",
+        "price": "296",
+        "quantity": "1"
+      },
+      {
+        "id": "1016",
+        "name": "Colgate Toothbrush",
+        "price": "120",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-01T06:40:36.585Z"
   }
 }
