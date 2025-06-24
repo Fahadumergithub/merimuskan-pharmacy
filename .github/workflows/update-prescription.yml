@@ -6,9 +6,12 @@ on:
       rxId:
         description: 'Prescription ID (e.g., RX-12345)'
         required: true
+        type: string
       data:
         description: 'Prescription Data (as JSON string)'
         required: true
+        type: string
+        default: '{}'
 
 permissions:
   contents: write
@@ -21,33 +24,54 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Setup environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Validate JSON input
         run: |
-          # Create prescriptions.json if it doesn't exist
+          if ! echo '${{ github.event.inputs.data }}' | jq empty; then
+            echo "Invalid JSON input"
+            exit 1
+          fi
+
+      - name: Initialize prescriptions.json if missing
+        run: |
           if [ ! -f "prescriptions.json" ]; then
             echo "{}" > prescriptions.json
           fi
 
       - name: Update prescriptions.json
         run: |
-          # Convert input to valid JSON
-          RX_DATA=$(echo '${{ github.event.inputs.data }}' | jq -r '.')
+          # Process the input data with proper JSON handling
+          RX_DATA=$(echo '${{ toJSON(fromJSON(github.event.inputs.data)) }}' | jq -c .)
           
-          # Update the file
+          # Update the prescriptions file
           jq --arg id "${{ github.event.inputs.rxId }}" \
              --argjson data "$RX_DATA" \
              '.[$id] = $data' prescriptions.json > temp.json && mv temp.json prescriptions.json
 
           # Verify the update
-          echo "Updated prescriptions.json:"
+          echo "Updated prescriptions.json content:"
           jq . prescriptions.json
 
-      - name: Commit and push changes
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Commit and push changes
+        run: |
           git add prescriptions.json
-          git commit -m "Updated prescription: ${{ github.event.inputs.rxId }}"
-          git push
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit"
+          else
+            git commit -m "Updated prescription: ${{ github.event.inputs.rxId }} [skip ci]"
+            git push
+          fi
