@@ -384,5 +384,36 @@
       }
     ],
     "expiresAt": "2025-07-01T13:53:41.491Z"
+  },
+  "RX-5763": {
+    "doctorName": "fahad",
+    "patientName": "arsalan",
+    "patientPhone": "03332165755",
+    "patientEmail": "dr.fahadumer@gmail.com",
+    "patientAddress": "27/1 5th commercial street phase 4",
+    "prescriptionNotes": "Take medications",
+    "issuedDate": "2025-06-24",
+    "total": "197.50",
+    "products": [
+      {
+        "id": "1000",
+        "name": "Panadol Tablet 500mg",
+        "price": "33.5",
+        "quantity": "1"
+      },
+      {
+        "id": "1007",
+        "name": "Flagyl Tablet 400mg",
+        "price": "44",
+        "quantity": "1"
+      },
+      {
+        "id": "1016",
+        "name": "Colgate Toothbrush",
+        "price": "120",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-01T14:17:42.854Z"
   }
 }
