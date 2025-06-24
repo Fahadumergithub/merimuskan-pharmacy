@@ -215,7 +215,11 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
+    // Initialize EmailJS
+    emailjs.init("iTzoppHcrXT5MN1Iq");
+
     document.addEventListener('DOMContentLoaded', function() {
       // Show loading state initially
       document.getElementById('loadingState').style.display = 'block';
@@ -227,6 +231,40 @@
       if (!prescriptionId) {
         showError('Invalid prescription link - missing prescription ID');
         return;
+      }
+
+      // Google Sheets Web App Endpoint
+      const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3I8UteyaHx7ajZJAY0Ktv0i3O8GTBGqlff3tNIyD2yCc1-_f_K7yRP6q3JmzVfzy7jg/exec";
+
+      // Function to send data to Google Sheets
+      async function sendToGoogleSheet(orderData, orderId) {
+        const now = new Date();
+        const payload = {
+          order_id: orderId,
+          date: now.toLocaleDateString(),
+          time: now.toLocaleTimeString(),
+          name: orderData.patientName,
+          phone: orderData.patientPhone,
+          email: orderData.patientEmail,
+          address: orderData.patientAddress,
+          items: orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
+          total: orderData.total,
+          status: "Approved",
+          doctor: orderData.doctorName,
+          type: "Prescription"
+        };
+
+        try {
+          await fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          console.log("✅ Data sent to Google Sheets");
+        } catch (err) {
+          console.error("❌ Failed to send to Google Sheets:", err);
+        }
       }
 
       // Fetch prescription data from GitHub raw content
@@ -294,6 +332,80 @@
           // Show content after loading
           document.getElementById('loadingState').style.display = 'none';
           document.getElementById('confirmation-content').style.display = 'block';
+
+          // Approve button handler
+          document.getElementById('approvePrescription').addEventListener('click', async function() {
+            const button = this;
+            button.disabled = true;
+            document.getElementById('spinner').style.display = 'inline-block';
+
+            try {
+              const now = new Date();
+              const productsText = prescriptionData.products.map(p =>
+                `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
+              ).join('\n');
+
+              const orderSummary = `Prescription ID: ${prescriptionId}
+Approval Date: ${now.toLocaleDateString()}
+
+DOCTOR:
+${prescriptionData.doctorName}
+
+PATIENT DETAILS:
+Name: ${prescriptionData.patientName}
+Phone: ${prescriptionData.patientPhone}
+Email: ${prescriptionData.patientEmail}
+Address: ${prescriptionData.patientAddress}
+
+PRESCRIPTION NOTES:
+${prescriptionData.prescriptionNotes || "None"}
+
+MEDICATIONS:
+${productsText}
+
+TOTAL: ${prescriptionData.total} PKR`;
+
+              // Send confirmation emails
+              await emailjs.send("service_cor6xnd", "template_3e494ui", {
+                name: prescriptionData.patientName,
+                order_id: prescriptionId,
+                order_summary: orderSummary,
+                total: prescriptionData.total,
+                phone: prescriptionData.patientPhone,
+                email: prescriptionData.patientEmail
+              });
+
+              await emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+                customer_name: prescriptionData.patientName,
+                customer_phone: prescriptionData.patientPhone,
+                customer_email: prescriptionData.patientEmail,
+                order_id: prescriptionId,
+                order_summary: orderSummary,
+                order_total: prescriptionData.total,
+                order_timestamp: now.toLocaleString(),
+                doctor_name: prescriptionData.doctorName
+              });
+
+              await sendToGoogleSheet(prescriptionData, prescriptionId);
+
+              window.location.href = 'thankyou.html';
+            } catch (error) {
+              console.error("Error:", error);
+              alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
+              window.location.href = 'thankyou.html';
+            } finally {
+              button.disabled = false;
+              document.getElementById('spinner').style.display = 'none';
+            }
+          });
+
+          // Reject button handler
+          document.getElementById('rejectPrescription').addEventListener('click', function() {
+            if (confirm("Request changes to this prescription? The doctor will be notified.")) {
+              alert("Your request has been noted. The doctor will contact you shortly.");
+              window.location.href = 'index.html';
+            }
+          });
         })
         .catch(error => {
           console.error('Error loading prescription:', error);
@@ -318,27 +430,6 @@
         document.getElementById('errorText').innerHTML = message;
         console.error(message);
       }
-
-      // Approve button handler
-      document.getElementById('approvePrescription').addEventListener('click', function() {
-        const button = this;
-        button.disabled = true;
-        document.getElementById('spinner').style.display = 'inline-block';
-
-        // Simulate processing (replace with actual API call)
-        setTimeout(() => {
-          alert('Prescription approved! Your order has been placed.');
-          window.location.href = 'thankyou.html';
-        }, 1500);
-      });
-
-      // Reject button handler
-      document.getElementById('rejectPrescription').addEventListener('click', function() {
-        if (confirm("Request changes to this prescription? The doctor will be notified.")) {
-          alert("Your request has been noted. The doctor will contact you shortly.");
-          window.location.href = 'index.html';
-        }
-      });
     });
   </script>
 </body>
