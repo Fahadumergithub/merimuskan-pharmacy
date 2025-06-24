@@ -141,17 +141,19 @@
       border-left: 4px solid #4299e1;
     }
     .loading-state {
-      display: none;
       text-align: center;
       padding: 20px;
+    }
+    .error-message {
+      text-align: center;
+      padding: 20px;
+      color: #e53e3e;
     }
     #confirmation-content {
       display: none;
     }
-    .expired-notice {
-      text-align: center;
-      padding: 40px;
-      color: #e53e3e;
+    #expiredNotice {
+      display: none;
     }
   </style>
 </head>
@@ -160,13 +162,19 @@
     <p>Loading your prescription...</p>
   </div>
 
-  <div id="expiredNotice" class="expired-notice" style="display:none;">
+  <div id="expiredNotice" class="error-message">
     <h2>Prescription Expired</h2>
     <p>This prescription link has expired. Please contact your doctor for a new prescription.</p>
-    <a href="index.html" class="reject-button">Return to Home</a>
+    <button onclick="window.location.href='index.html'" class="reject-button">Return to Home</button>
   </div>
 
-  <div id="confirmation-content" class="confirmation-container" style="display:none;">
+  <div id="errorMessage" class="error-message" style="display:none;">
+    <h2>Error Loading Prescription</h2>
+    <p id="errorText"></p>
+    <button onclick="window.location.reload()" class="reject-button">Try Again</button>
+  </div>
+
+  <div id="confirmation-content" class="confirmation-container">
     <div class="confirmation-header">
       <div class="icon">℞</div>
       <h1>Review Your Prescription</h1>
@@ -217,20 +225,27 @@
       const prescriptionId = urlParams.get('rx');
       
       if (!prescriptionId) {
-        alert('Invalid prescription link');
-        window.location.href = 'index.html';
+        showError('Invalid prescription link - missing prescription ID');
         return;
       }
 
-      // Fetch prescription data from prescriptions.json
-      fetch('prescriptions.json')
-        .then(response => response.json())
+      // Fetch prescription data from GitHub raw content
+      fetch('https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/prescriptions.json?t=' + Date.now())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.status);
+          }
+          return response.json();
+        })
         .then(data => {
+          if (!data || typeof data !== 'object') {
+            throw new Error('Invalid prescription data format');
+          }
+
           const prescriptionData = data[prescriptionId];
           
           if (!prescriptionData) {
-            alert('Prescription not found. Please ask your doctor to resend.');
-            window.location.href = 'index.html';
+            showError('Prescription not found. Please ask your doctor to resend.');
             return;
           }
 
@@ -244,45 +259,65 @@
 
           // Populate doctor details
           document.getElementById('doctorDetails').innerHTML = `
-            <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
+            <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${escapeHtml(prescriptionData.doctorName)}</div></div>
             <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
           `;
 
           // Populate patient details
           document.getElementById('patientDetails').innerHTML = `
-            <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
-            <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
-            <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
-            <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
+            <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${escapeHtml(prescriptionData.patientName)}</div></div>
+            <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${escapeHtml(prescriptionData.patientPhone)}</div></div>
+            <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${escapeHtml(prescriptionData.patientEmail)}</div></div>
+            <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${escapeHtml(prescriptionData.patientAddress)}</div></div>
           `;
 
           // Populate prescription notes
-          document.getElementById('prescriptionNotes').textContent = 
-            prescriptionData.prescriptionNotes || "No special instructions provided";
+          const notes = prescriptionData.prescriptionNotes || "No special instructions provided";
+          document.getElementById('prescriptionNotes').textContent = notes;
+          document.getElementById('prescriptionNotesContainer').style.display = notes ? 'block' : 'none';
 
           // Populate order items
           const orderItems = document.getElementById('orderItems');
+          orderItems.innerHTML = ''; // Clear existing items
           prescriptionData.products.forEach(product => {
-            const itemTotal = (product.price * product.quantity).toFixed(2);
+            const itemTotal = (parseFloat(product.price) * parseInt(product.quantity)).toFixed(2);
             orderItems.innerHTML += `
               <div class="product-item">
-                <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
+                <div><strong>${escapeHtml(product.name)}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
                 <div>${itemTotal} PKR</div>
               </div>
             `;
           });
 
-          document.getElementById('orderTotal').textContent = prescriptionData.total;
+          document.getElementById('orderTotal').textContent = prescriptionData.total || '0.00';
 
           // Show content after loading
           document.getElementById('loadingState').style.display = 'none';
-          document.getElementById('confiration-content').style.display = 'block';
+          document.getElementById('confirmation-content').style.display = 'block';
         })
         .catch(error => {
           console.error('Error loading prescription:', error);
-          alert('Error loading prescription. Please try again later.');
-          window.location.href = 'index.html';
+          showError('Error loading prescription. Please try again later.<br>' + error.message);
         });
+
+      // Helper function to escape HTML
+      function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe.toString()
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Helper function to show errors
+      function showError(message) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('errorText').innerHTML = message;
+        console.error(message);
+      }
 
       // Approve button handler
       document.getElementById('approvePrescription').addEventListener('click', function() {
@@ -290,11 +325,7 @@
         button.disabled = true;
         document.getElementById('spinner').style.display = 'inline-block';
 
-        // In a real implementation, you would:
-        // 1. Send confirmation to your backend
-        // 2. Process the order
-        // 3. Show success message
-        
+        // Simulate processing (replace with actual API call)
         setTimeout(() => {
           alert('Prescription approved! Your order has been placed.');
           window.location.href = 'thankyou.html';
@@ -304,7 +335,6 @@
       // Reject button handler
       document.getElementById('rejectPrescription').addEventListener('click', function() {
         if (confirm("Request changes to this prescription? The doctor will be notified.")) {
-          // In a full implementation, we would send an email to the doctor here
           alert("Your request has been noted. The doctor will contact you shortly.");
           window.location.href = 'index.html';
         }
