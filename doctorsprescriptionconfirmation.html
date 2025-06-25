@@ -25,19 +25,6 @@
       text-align: center;
       margin-bottom: 32px;
     }
-    .confirmation-header .icon {
-      width: 64px;
-      height: 64px;
-      background-color: #4299e1;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      color: white;
-      font-size: 32px;
-      font-weight: bold;
-    }
     .confirmation-header h1 {
       margin: 0;
       font-size: 24px;
@@ -47,18 +34,12 @@
       margin: 8px 0 0;
       color: #666;
     }
-    .order-summary {
-      margin-bottom: 32px;
-    }
     .section-title {
       font-size: 18px;
       font-weight: 600;
-      margin: 0 0 16px;
+      margin: 24px 0 16px;
       padding-bottom: 8px;
       border-bottom: 1px solid #eee;
-    }
-    .doctor-info, .patient-info {
-      margin-bottom: 24px;
     }
     .info-row {
       display: flex;
@@ -66,7 +47,7 @@
     }
     .info-label {
       font-weight: 500;
-      width: 120px;
+      width: 150px;
       color: #666;
     }
     .info-value {
@@ -92,126 +73,108 @@
       margin: 0;
       font-size: 18px;
     }
-    .action-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 32px;
-    }
-    .reject-button, .approve-button {
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      font-size: 16px;
-    }
-    .reject-button {
-      background: #f0f0f0;
-      color: #333;
-      border: none;
-    }
     .approve-button {
+      width: 100%;
+      padding: 16px;
       background: #4299e1;
       color: white;
       border: none;
-      display: flex;
-      align-items: center;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 32px;
+      transition: background 0.3s;
     }
     .approve-button:hover {
       background: #3182ce;
     }
+    .approve-button:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+    }
     .loading-spinner {
-      display: none;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
       width: 20px;
       height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-      margin-right: 10px;
+      animation: spin 1s linear infinite;
+      display: none;
+      margin-left: 10px;
+      vertical-align: middle;
     }
     @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .prescription-notes {
-      background: #ebf8ff;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-      border-left: 4px solid #4299e1;
-    }
-    .loading-state {
-      text-align: center;
-      padding: 20px;
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     .error-message {
-      text-align: center;
-      padding: 20px;
       color: #e53e3e;
+      background: #fff5f5;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #e53e3e;
     }
-    #confirmation-content {
-      display: none;
-    }
-    #expiredNotice {
-      display: none;
+    .expired-message {
+      color: #dd6b20;
+      background: #fffaf0;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #dd6b20;
     }
   </style>
 </head>
 <body>
-  <div id="loadingState" class="loading-state">
-    <p>Loading your prescription...</p>
-  </div>
-
-  <div id="expiredNotice" class="error-message">
-    <h2>Prescription Expired</h2>
-    <p>This prescription link has expired. Please contact your doctor for a new prescription.</p>
-    <button onclick="window.location.href='index.html'" class="reject-button">Return to Home</button>
-  </div>
-
-  <div id="errorMessage" class="error-message" style="display:none;">
-    <h2>Error Loading Prescription</h2>
-    <p id="errorText"></p>
-    <button onclick="window.location.reload()" class="reject-button">Try Again</button>
-  </div>
-
-  <div id="confirmation-content" class="confirmation-container">
+  <div class="confirmation-container">
     <div class="confirmation-header">
-      <div class="icon">℞</div>
-      <h1>Review Your Prescription</h1>
-      <p>Please verify your prescription details before approval</p>
+      <h1>Prescription Approval</h1>
+      <p>Please review and confirm your prescription details</p>
     </div>
 
-    <div class="order-summary">
-      <div class="doctor-info">
-        <h2 class="section-title">Doctor Information</h2>
-        <div id="doctorDetails"></div>
+    <div id="errorContainer" style="display: none;">
+      <div class="error-message">
+        <strong>Error loading prescription:</strong> 
+        <span id="errorText"></span>
+        <p>Please contact the pharmacy for assistance.</p>
+      </div>
+    </div>
+
+    <div id="expiredContainer" style="display: none;">
+      <div class="expired-message">
+        <strong>This prescription link has expired</strong>
+        <p>Please contact your doctor or the pharmacy for a new prescription.</p>
+      </div>
+    </div>
+
+    <div id="prescriptionContent" style="display: none;">
+      <div class="prescription-info">
+        <h2 class="section-title">Prescription Details</h2>
+        <div id="prescriptionDetails"></div>
       </div>
 
       <div class="patient-info">
-        <h2 class="section-title">Your Information</h2>
+        <h2 class="section-title">Patient Information</h2>
         <div id="patientDetails"></div>
       </div>
 
-      <div id="prescriptionNotesContainer" class="prescription-notes">
-        <h3>Doctor's Instructions</h3>
-        <p id="prescriptionNotes"></p>
-      </div>
-
       <div class="products-summary">
-        <h2 class="section-title">Prescribed Medications</h2>
-        <div id="orderItems"></div>
+        <h2 class="section-title">Medications</h2>
+        <div id="prescriptionItems"></div>
         <div class="total-section">
-          <h3>Total: <span id="orderTotal">0.00</span> PKR</h3>
+          <h3>Estimated Total: <span id="prescriptionTotal">0.00</span> PKR</h3>
         </div>
       </div>
+
+      <button id="approvePrescription" class="approve-button">
+        Approve Prescription
+        <span id="spinner" class="loading-spinner"></span>
+      </button>
     </div>
 
-    <div class="action-buttons">
-      <button id="rejectPrescription" class="reject-button">Request Changes</button>
-      <button id="approvePrescription" class="approve-button">
-        <span id="spinner" class="loading-spinner"></span>
-        Approve and Confirm Order
-      </button>
+    <div id="loadingMessage" style="text-align: center; padding: 40px;">
+      <p>Loading prescription details...</p>
     </div>
   </div>
 
@@ -221,211 +184,220 @@
     emailjs.init("iTzoppHcrXT5MN1Iq");
 
     document.addEventListener('DOMContentLoaded', function() {
-      // Show loading state initially
-      document.getElementById('loadingState').style.display = 'block';
-      
-      // Get prescription ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const prescriptionId = urlParams.get('rx');
       
       if (!prescriptionId) {
-        showError('Invalid prescription link - missing prescription ID');
+        showError("Prescription ID not found in URL");
         return;
       }
 
-      // Google Sheets Web App Endpoint
-      const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3I8UteyaHx7ajZJAY0Ktv0i3O8GTBGqlff3tNIyD2yCc1-_f_K7yRP6q3JmzVfzy7jg/exec";
+      // Fetch prescription data from GitHub
+      fetchPrescriptionData(prescriptionId);
+    });
 
-      // Function to send data to Google Sheets
-      async function sendToGoogleSheet(orderData, orderId) {
-        const now = new Date();
-        const payload = {
-          order_id: orderId,
-          date: now.toLocaleDateString(),
-          time: now.toLocaleTimeString(),
-          name: orderData.patientName,
-          phone: orderData.patientPhone,
-          email: orderData.patientEmail,
-          address: orderData.patientAddress,
-          items: orderData.products.map(p => `${p.quantity}x ${p.name}`).join(', '),
-          total: orderData.total,
-          status: "Approved",
-          doctor: orderData.doctorName,
-          type: "Prescription"
-        };
-
-        try {
-          await fetch(GOOGLE_APPS_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-          console.log("✅ Data sent to Google Sheets");
-        } catch (err) {
-          console.error("❌ Failed to send to Google Sheets:", err);
+    async function fetchPrescriptionData(prescriptionId) {
+      try {
+        // Try fetching from raw GitHub URL
+        const response = await fetch(`https://raw.githubusercontent.com/fahadumergithub/merimuskan-pharmacy/main/prescriptions.json?t=${Date.now()}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        const prescriptionData = data[prescriptionId];
+
+        if (!prescriptionData) {
+          throw new Error("Prescription not found");
+        }
+
+        // Check if prescription is expired
+        const now = new Date();
+        const expiresAt = new Date(prescriptionData.expiresAt);
+        
+        if (now > expiresAt) {
+          showExpired();
+          return;
+        }
+
+        // Display prescription data
+        displayPrescription(prescriptionData, prescriptionId);
+        
+      } catch (error) {
+        console.error("Error fetching prescription:", error);
+        showError(error.message || "Failed to load prescription data");
       }
+    }
 
-      // Fetch prescription data from GitHub raw content
-      fetch('https://raw.githubusercontent.com/Fahadumergithub/merimuskan-pharmacy/main/prescriptions.json?t=' + Date.now())
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (!data || typeof data !== 'object') {
-            throw new Error('Invalid prescription data format');
-          }
+    function displayPrescription(prescriptionData, prescriptionId) {
+      // Hide loading message and show content
+      document.getElementById('loadingMessage').style.display = 'none';
+      document.getElementById('prescriptionContent').style.display = 'block';
 
-          const prescriptionData = data[prescriptionId];
-          
-          if (!prescriptionData) {
-            showError('Prescription not found. Please ask your doctor to resend.');
-            return;
-          }
+      // Store prescription data in global variable for approval button
+      window.prescriptionData = prescriptionData;
+      window.prescriptionId = prescriptionId;
 
-          // Check expiration
-          const expiresAt = new Date(prescriptionData.expiresAt);
-          if (Date.now() > expiresAt.getTime()) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('expiredNotice').style.display = 'block';
-            return;
-          }
+      // Populate prescription details
+      document.getElementById('prescriptionDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${prescriptionData.doctorName}</div></div>
+        <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
+        <div class="info-row"><div class="info-label">Notes:</div><div class="info-value">${prescriptionData.prescriptionNotes || "None"}</div></div>
+      `;
 
-          // Populate doctor details
-          document.getElementById('doctorDetails').innerHTML = `
-            <div class="info-row"><div class="info-label">Doctor:</div><div class="info-value">${escapeHtml(prescriptionData.doctorName)}</div></div>
-            <div class="info-row"><div class="info-label">Issued Date:</div><div class="info-value">${new Date(prescriptionData.issuedDate).toLocaleDateString()}</div></div>
-          `;
+      // Populate patient details
+      document.getElementById('patientDetails').innerHTML = `
+        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${prescriptionData.patientName}</div></div>
+        <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${prescriptionData.patientPhone}</div></div>
+        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${prescriptionData.patientEmail}</div></div>
+        <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${prescriptionData.patientAddress}</div></div>
+      `;
 
-          // Populate patient details
-          document.getElementById('patientDetails').innerHTML = `
-            <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${escapeHtml(prescriptionData.patientName)}</div></div>
-            <div class="info-row"><div class="info-label">Phone:</div><div class="info-value">${escapeHtml(prescriptionData.patientPhone)}</div></div>
-            <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${escapeHtml(prescriptionData.patientEmail)}</div></div>
-            <div class="info-row"><div class="info-label">Address:</div><div class="info-value">${escapeHtml(prescriptionData.patientAddress)}</div></div>
-          `;
+      // Populate prescription items
+      const prescriptionItems = document.getElementById('prescriptionItems');
+      prescriptionItems.innerHTML = ''; // Clear any existing items
+      
+      prescriptionData.products.forEach(product => {
+        const itemTotal = (product.price * product.quantity).toFixed(2);
+        prescriptionItems.innerHTML += `
+          <div class="product-item">
+            <div><strong>${product.name}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
+            <div>${itemTotal} PKR</div>
+          </div>
+        `;
+      });
 
-          // Populate prescription notes
-          const notes = prescriptionData.prescriptionNotes || "No special instructions provided";
-          document.getElementById('prescriptionNotes').textContent = notes;
-          document.getElementById('prescriptionNotesContainer').style.display = notes ? 'block' : 'none';
+      document.getElementById('prescriptionTotal').textContent = prescriptionData.total;
 
-          // Populate order items
-          const orderItems = document.getElementById('orderItems');
-          orderItems.innerHTML = '';
-          prescriptionData.products.forEach(product => {
-            const itemTotal = (parseFloat(product.price) * parseInt(product.quantity)).toFixed(2);
-            orderItems.innerHTML += `
-              <div class="product-item">
-                <div><strong>${escapeHtml(product.name)}</strong><div>${product.quantity} × ${product.price} PKR</div></div>
-                <div>${itemTotal} PKR</div>
-              </div>
-            `;
-          });
+      // Set up approve button handler
+      document.getElementById('approvePrescription').addEventListener('click', approvePrescription);
+    }
 
-          document.getElementById('orderTotal').textContent = prescriptionData.total || '0.00';
+    function showError(message) {
+      document.getElementById('loadingMessage').style.display = 'none';
+      document.getElementById('errorText').textContent = message;
+      document.getElementById('errorContainer').style.display = 'block';
+    }
 
-          // Show content after loading
-          document.getElementById('loadingState').style.display = 'none';
-          document.getElementById('confirmation-content').style.display = 'block';
+    function showExpired() {
+      document.getElementById('loadingMessage').style.display = 'none';
+      document.getElementById('expiredContainer').style.display = 'block';
+    }
 
-          // Approve button handler - FIXED to properly redirect after completion
-          document.getElementById('approvePrescription').addEventListener('click', async function() {
-            const button = this;
-            button.disabled = true;
-            document.getElementById('spinner').style.display = 'inline-block';
+    async function approvePrescription() {
+      const button = document.getElementById('approvePrescription');
+      button.disabled = true;
+      document.getElementById('spinner').style.display = 'inline-block';
 
-            try {
-              const now = new Date();
-              const productsText = prescriptionData.products.map(p =>
-                `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
-              ).join('\n');
+      try {
+        const now = new Date();
+        const productsText = prescriptionData.products.map(p =>
+          `${p.quantity}x ${p.name} @ ${p.price} PKR = ${(p.quantity * p.price).toFixed(2)} PKR`
+        ).join('\n');
 
-              const orderSummary = `Prescription ID: ${prescriptionId}
+        const orderSummary = `Prescription ID: ${prescriptionId}
 Approval Date: ${now.toLocaleDateString()}
+
 DOCTOR:
 ${prescriptionData.doctorName}
+
 PATIENT DETAILS:
 Name: ${prescriptionData.patientName}
 Phone: ${prescriptionData.patientPhone}
 Email: ${prescriptionData.patientEmail}
 Address: ${prescriptionData.patientAddress}
+
 PRESCRIPTION NOTES:
 ${prescriptionData.prescriptionNotes || "None"}
+
 MEDICATIONS:
 ${productsText}
+
 TOTAL: ${prescriptionData.total} PKR`;
 
-              // Execute all async operations sequentially
-              await Promise.all([
-                emailjs.send("service_cor6xnd", "template_3e494ui", {
-                  name: prescriptionData.patientName,
-                  order_id: prescriptionId,
-                  order_summary: orderSummary,
-                  total: prescriptionData.total,
-                  phone: prescriptionData.patientPhone,
-                  email: prescriptionData.patientEmail
-                }),
-                emailjs.send("service_cor6xnd", "template_y1yh0b9", {
-                  customer_name: prescriptionData.patientName,
-                  customer_phone: prescriptionData.patientPhone,
-                  customer_email: prescriptionData.patientEmail,
-                  order_id: prescriptionId,
-                  order_summary: orderSummary,
-                  order_total: prescriptionData.total,
-                  order_timestamp: now.toLocaleString(),
-                  doctor_name: prescriptionData.doctorName
-                }),
-                sendToGoogleSheet(prescriptionData, prescriptionId)
-              ]);
+        // Execute all operations in parallel and wait for completion
+        await Promise.all([
+          emailjs.send("service_cor6xnd", "template_3e494ui", {
+            name: prescriptionData.patientName,
+            order_id: prescriptionId,
+            order_summary: orderSummary,
+            total: prescriptionData.total,
+            phone: prescriptionData.patientPhone,
+            email: prescriptionData.patientEmail
+          }),
+          emailjs.send("service_cor6xnd", "template_y1yh0b9", {
+            customer_name: prescriptionData.patientName,
+            customer_phone: prescriptionData.patientPhone,
+            customer_email: prescriptionData.patientEmail,
+            order_id: prescriptionId,
+            order_summary: orderSummary,
+            order_total: prescriptionData.total,
+            order_timestamp: now.toLocaleString(),
+            doctor_name: prescriptionData.doctorName
+          }),
+          sendToGoogleSheet(prescriptionData, prescriptionId)
+        ]);
 
-              // Only redirect after all operations complete
-              window.location.href = 'thankyou.html';
-              
-            } catch (error) {
-              console.error("Error:", error);
-              // Still redirect but show alert
-              alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
-              window.location.href = 'thankyou.html';
-            }
-          });
+        // Force page redirect after all operations complete
+        window.location.href = 'thankyou.html?rx=' + encodeURIComponent(prescriptionId);
 
-          // Reject button handler
-          document.getElementById('rejectPrescription').addEventListener('click', function() {
-            if (confirm("Request changes to this prescription? The doctor will be notified.")) {
-              alert("Your request has been noted. The doctor will contact you shortly.");
-              window.location.href = 'index.html';
-            }
-          });
-        })
-        .catch(error => {
-          console.error('Error loading prescription:', error);
-          showError('Error loading prescription. Please try again later.<br>' + error.message);
+      } catch (error) {
+        console.error("Error:", error);
+        // Ensure spinner is hidden even on error
+        button.disabled = false;
+        document.getElementById('spinner').style.display = 'none';
+        
+        // Still redirect but show alert
+        alert("Prescription approved! If email doesn't arrive, please call the pharmacy.");
+        window.location.href = 'thankyou.html?rx=' + encodeURIComponent(prescriptionId);
+      }
+    }
+
+    async function sendToGoogleSheet(prescriptionData, prescriptionId) {
+      const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbydcwMR_gCvg1GrFF0OplPCfk8BCHyGGcTzwBPGfte9KxJbhyN8CskRvtypsD9tF71ajQ/exec";
+      
+      const payload = {
+        rxId: prescriptionId,
+        data: prescriptionData
+      };
+
+      try {
+        // First try with fetch
+        await fetch(GAS_ENDPOINT, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
         });
-
-      // Helper function to escape HTML
-      function escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe.toString()
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
+      } catch (error) {
+        console.log('Fallback to form submission');
+        // Fallback method using form submission
+        const form = document.createElement('form');
+        form.style.display = 'none';
+        form.method = 'POST';
+        form.action = GAS_ENDPOINT;
+        form.target = '_blank';
+        
+        const rxInput = document.createElement('input');
+        rxInput.type = 'hidden';
+        rxInput.name = 'rxId';
+        rxInput.value = prescriptionId;
+        form.appendChild(rxInput);
+        
+        const dataInput = document.createElement('input');
+        dataInput.type = 'hidden';
+        dataInput.name = 'data';
+        dataInput.value = JSON.stringify(prescriptionData);
+        form.appendChild(dataInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        setTimeout(() => document.body.removeChild(form), 1000);
       }
-
-      // Helper function to show errors
-      function showError(message) {
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('errorMessage').style.display = 'block';
-        document.getElementById('errorText').innerHTML = message;
-        console.error(message);
-      }
-    });
+    }
   </script>
 </body>
 </html>
