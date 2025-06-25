@@ -583,5 +583,36 @@
       }
     ],
     "expiresAt": "2025-07-02T04:26:54.925Z"
+  },
+  "RX-8364": {
+    "doctorName": "test",
+    "patientName": "arsalan",
+    "patientPhone": "03332165755",
+    "patientEmail": "dr.fahadumer@gmail.com",
+    "patientAddress": "27/1 5th commercial street phase 4",
+    "prescriptionNotes": "HI testing",
+    "issuedDate": "2025-06-25",
+    "total": "899.00",
+    "products": [
+      {
+        "id": "1004",
+        "name": "Ansaid Tablet 100mg",
+        "price": "121",
+        "quantity": "1"
+      },
+      {
+        "id": "1005",
+        "name": "Augmentin Tablet 1g",
+        "price": "338",
+        "quantity": "1"
+      },
+      {
+        "id": "1010",
+        "name": "Sensodyne Rapid Action",
+        "price": "440",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-02T05:51:42.288Z"
   }
 }
