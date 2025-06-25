@@ -558,5 +558,30 @@
       }
     ],
     "expiresAt": "2025-07-02T04:26:26.038Z"
+  },
+  "RX-1613": {
+    "doctorName": "Amna",
+    "patientName": "arsalan",
+    "patientPhone": "03332165755",
+    "patientEmail": "dr.fahadumer@gmail.com",
+    "patientAddress": "27/1 5th commercial street phase 4",
+    "prescriptionNotes": "hi",
+    "issuedDate": "2025-06-25",
+    "total": "257.50",
+    "products": [
+      {
+        "id": "1001",
+        "name": "Panadol Children's",
+        "price": "136.5",
+        "quantity": "1"
+      },
+      {
+        "id": "1004",
+        "name": "Ansaid Tablet 100mg",
+        "price": "121",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-02T04:26:54.925Z"
   }
 }
