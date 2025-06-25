@@ -459,5 +459,30 @@
       }
     ],
     "expiresAt": "2025-07-02T04:06:06.975Z"
+  },
+  "RX-9162": {
+    "doctorName": "Amna",
+    "patientName": "arsalan",
+    "patientPhone": "03332165755",
+    "patientEmail": "dr.fahadumer@gmail.com",
+    "patientAddress": "27/1 5th commercial street phase 4",
+    "prescriptionNotes": "hi",
+    "issuedDate": "2025-06-25",
+    "total": "187.00",
+    "products": [
+      {
+        "id": "1002",
+        "name": "Brufen Tablet 400mg",
+        "price": "66",
+        "quantity": "1"
+      },
+      {
+        "id": "1004",
+        "name": "Ansaid Tablet 100mg",
+        "price": "121",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-02T04:10:59.909Z"
   }
 }
