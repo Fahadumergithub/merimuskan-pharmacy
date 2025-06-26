@@ -721,5 +721,48 @@
       }
     ],
     "expiresAt": "2025-07-03T08:44:55.821Z"
+  },
+  "RX-7265": {
+    "doctorName": "a",
+    "patientName": "a",
+    "patientPhone": "a",
+    "patientEmail": "syed.arsalan@medentec.com",
+    "patientAddress": "a",
+    "prescriptionNotes": "aa",
+    "issuedDate": "2025-06-26",
+    "total": "785.00",
+    "products": [
+      {
+        "id": 1000,
+        "name": "Panadol Tablet 500mg",
+        "price": 33.5,
+        "quantity": 1
+      },
+      {
+        "id": 1001,
+        "name": "Panadol Children's",
+        "price": 136.5,
+        "quantity": 1
+      },
+      {
+        "id": 1002,
+        "name": "Brufen Tablet 400mg",
+        "price": 66,
+        "quantity": 1
+      },
+      {
+        "id": 1003,
+        "name": "Brufen DS 90ml Suspension",
+        "price": 109,
+        "quantity": 1
+      },
+      {
+        "id": 1010,
+        "name": "Sensodyne Rapid Action",
+        "price": 440,
+        "quantity": 1
+      }
+    ],
+    "expiresAt": "2025-07-03T09:04:38.774Z"
   }
 }
