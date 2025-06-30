@@ -826,5 +826,36 @@
       }
     ],
     "expiresAt": "2025-07-03T09:39:17.903Z"
+  },
+  "RX-7710": {
+    "doctorName": "Dr. Aamna",
+    "patientName": "Aamna",
+    "patientPhone": "03002425218",
+    "patientEmail": "aamnakhalid022@gmail.com",
+    "patientAddress": "B-116 block 2 gulshan e iqbal",
+    "prescriptionNotes": "....",
+    "issuedDate": "2025-06-26",
+    "total": "503.00",
+    "products": [
+      {
+        "id": "1004",
+        "name": "Ansaid Tablet 100mg",
+        "price": "121",
+        "quantity": "1"
+      },
+      {
+        "id": "1005",
+        "name": "Augmentin Tablet 1g",
+        "price": "338",
+        "quantity": "1"
+      },
+      {
+        "id": "1007",
+        "name": "Flagyl Tablet 400mg",
+        "price": "44",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-07-07T08:38:29.883Z"
   }
 }
