@@ -919,5 +919,30 @@
       }
     ],
     "expiresAt": "2025-07-09T10:41:34.154Z"
+  },
+  "RX-2551": {
+    "doctorName": "Dr. Karshma",
+    "patientName": "Mahnoor Zeeshan",
+    "patientPhone": "03233289006",
+    "patientEmail": "zeeshanmahnoor7@gmail.com",
+    "patientAddress": "DHA karachi",
+    "prescriptionNotes": "Tab. Ansaid 100mg: Up to 3 times a day, only in case of pain.\n\nEnziclor mouthwash :3 times a day.\n\nWarm water and salt rinses: 4–5 times a day.",
+    "issuedDate": "2025-10-07",
+    "total": "472.00",
+    "products": [
+      {
+        "id": "1004",
+        "name": "Ansaid Tablet 100mg",
+        "price": "121",
+        "quantity": "1"
+      },
+      {
+        "id": "1014",
+        "name": "Enziclor Mouthwash",
+        "price": "351",
+        "quantity": "1"
+      }
+    ],
+    "expiresAt": "2025-11-01T09:33:05.912Z"
   }
 }
